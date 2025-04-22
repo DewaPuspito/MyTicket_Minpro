@@ -14,19 +14,23 @@ export interface UserRegister {
 
 export interface EventInput {
     title: string,
+    description: string,
     price: number,
     start_date: Date,
     end_date: Date,
     available_seats: number,
     location: string,
-    category: string,
+    category: 'MUSIC' | 'SPORTS' | 'BUSINESS' | 'TECHNOLOGY' | 'EDUCATION',
+    imageURL: string,
     userId: number
 }
 
 export interface EventQuery {
     search?: string,
+    description?: string,
     location?: string,
     category?: string,
+    imageURL?: string,
     page?: number,
     limit?: number
 }

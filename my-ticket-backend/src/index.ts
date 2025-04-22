@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import { AuthRouter } from './routes/auth.router';
 import { EventRouter } from './routes/events.router';
+import { EmailRouter } from './routes/email.router';
 
 class Server {
   private app: Application;
@@ -20,6 +21,7 @@ class Server {
   private routes(): void {
     this.app.use('/api', new AuthRouter().router);
     this.app.use('/api', new EventRouter().router);
+    this.app.use('/api', new EmailRouter().router);
   }
 
   public start(): void {
