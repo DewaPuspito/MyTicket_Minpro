@@ -1,4 +1,6 @@
-export const passwordResetTemplate = (username: string, resetLink: string, expiryHours: number = 24) => `
+import { UserPayload } from "../../models/interface";
+
+export const passwordResetTemplate = (user: UserPayload['name'], resetLink: string, expiryHours: number = 24) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,7 +66,7 @@ export const passwordResetTemplate = (username: string, resetLink: string, expir
       Permintaan Reset Password
     </div>
     <div class="content">
-      <h2>Halo ${username},</h2>
+      <h2>Halo ${user},</h2>
       <p>Kami menerima permintaan reset password untuk akun Anda. Silakan klik tombol di bawah ini untuk melanjutkan:</p>
       
       <a href="${resetLink}" class="button">Reset Password</a>

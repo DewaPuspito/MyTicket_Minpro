@@ -5,8 +5,8 @@ import {UserPayload} from '../models/interface'
 dotenv.config()
 
 export class JwtUtils {
-    private static secret = process.env.JWT_SECRET as any;
-    private static expiration = '7d' as any
+    private static secret: string = process.env.JWT_SECRET || 'default-secret-key';
+    private static expiration: `${number}d` = '7d';
 
     static generateToken(payload: UserPayload) {
         return jwt.sign(payload, this.secret, {

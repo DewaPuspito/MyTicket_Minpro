@@ -1,15 +1,26 @@
 export interface UserPayload {
     id: number,
     name: string,
-    role: "CUSTOMER" | "EVENT_ORGANIZER"
+    role: "CUSTOMER" | "EVENT_ORGANIZER" | null
 }
 
 export interface UserRegister {
     name: string,
     email: string,
     password: string,
+    birth_date: string,
+    gender: 'MALE' | 'FEMALE',
     role : 'CUSTOMER' | 'EVENT_ORGANIZER',
     refferalCode? : string
+}
+
+export interface UserProfile {
+    name?: string,
+    email?: string,
+    password?: string,
+    birth_date?: string,
+    gender?: 'MALE' | 'FEMALE',
+    profile_pic?: string
 }
 
 export interface EventInput {

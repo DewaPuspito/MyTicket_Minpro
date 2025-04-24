@@ -10,9 +10,9 @@ export class EventController {
     this.eventService = new EventService();
   }
 
-  public async create(req: Request, res: Response): Promise<void> {
+  public async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const user = (req as any).user;
+      const user = req.user;
       const data: EventInput = {
         ...req.body,
         userId: user.id
@@ -53,16 +53,11 @@ export class EventController {
     }
   }
 
-  public async update(req: AuthenticatedRequest, res: Response) {
+  public async update(req: Request, res: Response) {
     try {
-
-      if (!req.user) {
-          "User Not Allowed"
-      }
-
       const { id } = req.params;
       const data: Partial<EventInput> = req.body;
-      const result = await this.eventService.update(Number(id), req.user.id, data);
+      const result = await this.eventService.update(Number(id), data);
       res.status(200).json({
         message: "Event updated successfully",
         data: result,
@@ -77,11 +72,8 @@ export class EventController {
 
   public async delete(req: AuthenticatedRequest, res: Response) {
     try {
-      if (!req.user) {
-        res.status(401).json({ message: "Unauthorized: User not authenticated" });
-      }
       const { id } = req.params;
-      const result = await this.eventService.delete(Number(id), req.user.id);
+      const result = await this.eventService.delete(Number(id));
       res.status(200).json({
         message: "Event deleted successfully",
         data: result,

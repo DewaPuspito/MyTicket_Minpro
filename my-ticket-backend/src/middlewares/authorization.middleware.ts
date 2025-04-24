@@ -5,7 +5,7 @@ export class AuthorizationMiddleware {
     static allowRoles(allowedRole: string | string[]) {
         return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
 
-            const user = (req as any).user
+            const user = req.user
             const roles = Array.isArray(allowedRole) ? allowedRole : [allowedRole]
 
            if (!user || !roles.includes(user.role)) {

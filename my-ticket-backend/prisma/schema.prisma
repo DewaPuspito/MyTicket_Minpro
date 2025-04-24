@@ -18,6 +18,8 @@ model User {
   name         String
   email        String        @unique
   password     String
+  birth_date   String
+  gender       Gender
   profile_pic  String?
   role         Role?
   refferalCode String?
@@ -52,16 +54,16 @@ model Event {
 }
 
 model Ticket {
-  id           Int           @id @default(autoincrement())
-  userId       Int
-  eventId      Int
-  price        Int
-  seats_booked String
-  user         User          @relation(fields: [userId], references: [id])
-  event        Event         @relation(fields: [eventId], references: [id])
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime?     @default(now())
-  Transaction  Transaction[]
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  eventId     Int
+  total_price Int
+  qty         Int
+  user        User          @relation(fields: [userId], references: [id])
+  event       Event         @relation(fields: [eventId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime?     @default(now())
+  Transaction Transaction[]
 }
 
 model Voucher {
@@ -88,22 +90,20 @@ model Coupon {
 }
 
 model Transaction {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  eventId     Int
-  ticketId    Int
-  voucherId   Int?
-  couponId    Int?
-  quantity    Int
-  total_price Int
-  status      Status
-  user        User      @relation(fields: [userId], references: [id])
-  event       Event     @relation(fields: [eventId], references: [id])
-  ticket      Ticket    @relation(fields: [ticketId], references: [id])
-  voucher     Voucher?  @relation(fields: [voucherId], references: [id])
-  coupon      Coupon?   @relation(fields: [couponId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @default(now())
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  eventId   Int
+  ticketId  Int
+  voucherId Int?
+  couponId  Int?
+  status    Status
+  user      User      @relation(fields: [userId], references: [id])
+  event     Event     @relation(fields: [eventId], references: [id])
+  ticket    Ticket    @relation(fields: [ticketId], references: [id])
+  voucher   Voucher?  @relation(fields: [voucherId], references: [id])
+  coupon    Coupon?   @relation(fields: [couponId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @default(now())
 }
 
 model Review {
@@ -120,6 +120,11 @@ model Review {
 enum Role {
   CUSTOMER
   EVENT_ORGANIZER
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }
 
 enum Category {
