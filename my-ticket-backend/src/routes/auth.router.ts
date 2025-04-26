@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
+import { AuthenticationMiddleware } from '../middlewares/authentication.middleware';
 
 export class AuthRouter {
   public router: Router;
@@ -14,6 +15,6 @@ export class AuthRouter {
   private routes(): void {
     this.router.post('/auth/login', this.authController.login.bind(this.authController));
     this.router.post('/auth/register', this.authController.register.bind(this.authController));
-    this.router.put('/auth/reset-password', this.authController.resetPassword.bind(this.authController));
+    this.router.put('/auth/reset-password', AuthenticationMiddleware.checkOwnership, this.authController.resetPassword.bind(this.authController));
   }
 }

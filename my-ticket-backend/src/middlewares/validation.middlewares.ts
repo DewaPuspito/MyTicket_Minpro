@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { ZodError, AnyZodObject } from "zod";
-import { AuthenticatedRequest } from "../types/express";
+import { RequestCollection } from "../types/express";
 
 interface Validation {
     body?: AnyZodObject,
@@ -10,7 +10,7 @@ interface Validation {
 
 export class ValidationMiddleware {
     static validate(schema: Validation) {
-        return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+        return (req: RequestCollection, res: Response, next: NextFunction) => {
             try {
                 if (schema.body) {
                     let bodySchema

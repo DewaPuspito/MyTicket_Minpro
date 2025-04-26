@@ -4,6 +4,11 @@ export interface UserPayload {
     role: "CUSTOMER" | "EVENT_ORGANIZER" | null
 }
 
+export interface EventPayload {
+    id: number,
+    title: string
+}
+
 export interface UserRegister {
     name: string,
     email: string,
@@ -44,4 +49,11 @@ export interface EventQuery {
     imageURL?: string,
     page?: number,
     limit?: number
+}
+
+export interface GenerateTicket {
+    qty: number,
+    total_price?: number,
+    userId: number,
+    eventTitle: number
 }

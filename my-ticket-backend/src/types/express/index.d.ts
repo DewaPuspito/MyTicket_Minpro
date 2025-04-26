@@ -1,6 +1,7 @@
-import { UserPayload } from "../models/interface";
+import { UserPayload, EventPayload } from "../models/interface";
 import { Request } from "express";
 
-export interface AuthenticatedRequest extends Request {
+export interface RequestCollection extends Request {
   user?: UserPayload;
+  event?: EventPayload;
 }

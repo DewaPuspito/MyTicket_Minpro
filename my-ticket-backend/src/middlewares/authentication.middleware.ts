@@ -1,13 +1,13 @@
 import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../types/express";
+import { RequestCollection } from "../types/express";
 import { JwtUtils } from "../lib/token.config";
 
 export class AuthenticationMiddleware {
-  static verifyToken(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+  static verifyToken(req: RequestCollection, res: Response, next: NextFunction): void {
     try {
       const authHeader = req.headers.authorization;
       
-      if (!authHeader?.startsWith('Bearer ')) {
+      if (!authHeader?.startsWith('Bearer')) {
         res.status(401).json({ message: 'Unauthorized' });
         return
       }
@@ -16,13 +16,14 @@ export class AuthenticationMiddleware {
       const decoded = JwtUtils.verifyToken(token);
       
       req.user = decoded;
+      
       next();
     } catch (error) {
       res.status(401).json({ message: 'Invalid token' });
     }
   }
 
-  static checkOwnership(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+  static checkOwnership(req: RequestCollection, res: Response, next: NextFunction): void {
     try {
       if (!req.user) {
         res.status(401).json({ message: 'Unauthorized: User not authenticated' });

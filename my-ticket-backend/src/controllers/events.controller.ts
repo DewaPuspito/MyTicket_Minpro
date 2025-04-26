@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { EventService } from "../services/events.service";
 import { EventInput, EventQuery } from "../models/interface";
-import { AuthenticatedRequest } from "../types/express";
+import { RequestCollection } from "../types/express";
 
 export class EventController {
   private eventService = new EventService();
@@ -10,7 +10,7 @@ export class EventController {
     this.eventService = new EventService();
   }
 
-  public async create(req: AuthenticatedRequest, res: Response): Promise<void> {
+  public async create(req: RequestCollection, res: Response): Promise<void> {
     try {
       const user = req.user;
       const data: EventInput = {
@@ -70,7 +70,7 @@ export class EventController {
     }
   }
 
-  public async delete(req: AuthenticatedRequest, res: Response) {
+  public async delete(req: RequestCollection, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.eventService.delete(Number(id));
