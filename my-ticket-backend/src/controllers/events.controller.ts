@@ -53,7 +53,7 @@ export class EventController {
     }
   }
 
-  public async update(req: Request, res: Response) {
+  public async update(req: RequestCollection, res: Response) {
     try {
       const { id } = req.params;
       const data: Partial<EventInput> = req.body;

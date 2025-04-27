@@ -6,7 +6,8 @@ export interface UserPayload {
 
 export interface EventPayload {
     id: number,
-    title: string
+    title: string,
+    userId: number
 }
 
 export interface UserRegister {

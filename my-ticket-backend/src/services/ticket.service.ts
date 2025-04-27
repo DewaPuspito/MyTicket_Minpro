@@ -14,28 +14,13 @@ export class TicketService {
             }
         });
 
-        const event = exactMatchEvent || await this.findPartialMatch(eventTitle);
+        const event = exactMatchEvent
         
         if (!event) {
             throw new Error(`Event "${eventTitle}" not found`);
         }
 
         return this.createTicket(event, data);
-    }
-
-    private async findPartialMatch(eventTitle: string) {
-        return await prisma.event.findFirst({
-            where: {
-                title: {
-                    contains: eventTitle,
-                    mode: 'insensitive'
-                }
-            },
-            orderBy: {
-                title: 'asc'
-            },
-            take: 1
-        });
     }
 
     private async createTicket(
