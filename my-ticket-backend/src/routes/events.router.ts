@@ -4,7 +4,7 @@ import { AuthenticationMiddleware } from '../middlewares/authentication.middlewa
 import { AuthorizationMiddleware } from '../middlewares/authorization.middleware';
 import { ValidationMiddleware } from '../middlewares/validation.middlewares';
 import { EventMiddleware } from '../middlewares/event.middleware';
-import { eventSchema } from '../lib/validation/validation.schema';
+import { eventSchema } from '../lib/validation/event.validation.schema';
 
 export class EventRouter {
   public router: Router;

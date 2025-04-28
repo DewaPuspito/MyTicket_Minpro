@@ -2,10 +2,10 @@ import { prisma } from "../prisma/client";
 import { Response, NextFunction } from "express";
 import { RequestCollection } from "../types/express";
 
-export class EventMiddleware {
-  static async findEvent(req: RequestCollection, res: Response, next: NextFunction) {
+export class TicketMiddleware {
+  static async findEventForTicket(req: RequestCollection, res: Response, next: NextFunction) {
     try {
-      const eventId = Number(req.params.id);
+      const eventId = Number(req.body.eventId);
       
       if (isNaN(eventId)) {
         res.status(400).json({ message: 'Invalid event ID' });

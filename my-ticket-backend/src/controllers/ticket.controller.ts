@@ -18,7 +18,24 @@ export class TicketController {
             if (!eventId || !qty) {
                 res.status(400).json({
                     success: false,
-                    message: "eventId and qty are required in request body"
+                    message: "Bad Request"
+                });
+            }
+
+            const quantity = Number(qty);
+            const eventIdNum = Number(eventId);
+
+            if (isNaN(quantity) || isNaN(eventIdNum)) {
+                res.status(400).json({
+                    success: false,
+                    message: "Invalid number format for eventId or qty"
+                });
+            }
+    
+            if (quantity <= 0) {
+                res.status(400).json({
+                    success: false,
+                    message: "Quantity must be greater than 0"
                 });
             }
     
@@ -37,10 +54,12 @@ export class TicketController {
             });
     
         } catch (error) {
-            console.error("Error:", error);
-            res.status(500).json({
+            const message = (error instanceof Error && error.message) ? error.message : '';
+            const statusCode = message.includes("Not enough tickets") || 
+                               message.includes("Quantity must be greater") ? 400 : 500;
+            res.status(statusCode).json({
                 success: false,
-                message: error instanceof Error ? error.message : "Failed to generate ticket"
+                message: "Failed to generate ticket"
             });
         }
     }
