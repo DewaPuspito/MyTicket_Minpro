@@ -3,21 +3,14 @@ import { GenerateTicket } from "../models/interface";
 
 export class TicketService {
     async generateTicket(data: GenerateTicket) {
-        const eventTitle = String(data.eventTitle);
-        
-        const exactMatchEvent = await prisma.event.findFirst({
+        const event = await prisma.event.findUnique({
             where: {
-                title: {
-                    equals: eventTitle,
-                    mode: 'insensitive'
-                }
+                id: data.eventId
             }
         });
-
-        const event = exactMatchEvent
         
         if (!event) {
-            throw new Error(`Event "${eventTitle}" not found`);
+            throw new Error(`Event with ID "${data.eventId}" not found`);
         }
 
         return this.createTicket(event, data);
@@ -43,7 +36,7 @@ export class TicketService {
             qty: ticket.qty,
             total_price: ticket.total_price,
             event: {
-                title: data.eventTitle
+                id: data.eventId
             }
         };
     }

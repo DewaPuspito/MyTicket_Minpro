@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { TicketController } from '../controllers/ticket.controller';
 import { AuthenticationMiddleware } from '../middlewares/authentication.middleware';
 import { AuthorizationMiddleware } from '../middlewares/authorization.middleware';
+import { EventMiddleware } from '../middlewares/event.middleware';
 
 export class TicketRouter {
   public router: Router;
@@ -14,6 +15,6 @@ export class TicketRouter {
   }
 
   private routes(): void {
-    this.router.post('/generate-ticket', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles('CUSTOMER'), this.ticketController.generateTicket.bind(this.ticketController));
+    this.router.post('/generate-ticket', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles('CUSTOMER'), EventMiddleware.findEvent, this.ticketController.generateTicket.bind(this.ticketController));
   }
 }

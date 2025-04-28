@@ -15,6 +15,6 @@ export class AuthRouter {
   private routes(): void {
     this.router.post('/auth/login', this.authController.login.bind(this.authController));
     this.router.post('/auth/register', this.authController.register.bind(this.authController));
-    this.router.put('/auth/reset-password', AuthenticationMiddleware.checkOwnership, this.authController.resetPassword.bind(this.authController));
+    this.router.put('/auth/reset-password', AuthenticationMiddleware.checkUserOwnership, this.authController.resetPassword.bind(this.authController));
   }
 }

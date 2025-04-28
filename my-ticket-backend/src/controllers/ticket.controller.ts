@@ -12,41 +12,35 @@ export class TicketController {
 
     public async generateTicket(req: RequestCollection, res: Response): Promise<void> {
         try {
+            const { eventId, qty } = req.body;
             const user = req.user;
-            const event = req.event
-
+    
+            if (!eventId || !qty) {
+                res.status(400).json({
+                    success: false,
+                    message: "eventId and qty are required in request body"
+                });
+            }
+    
             const data: GenerateTicket = {
-                ...req.body,
-                userId: user.id,
-                eventId: event.title
-            }
-
-            if (event || !data.qty) {
-                res.status(400).json({
-                    success: false,
-                    message: "You need to select event and seats"
-                });
-            }
-
-            if (data.qty <= 0) {
-                res.status(400).json({
-                    success: false,
-                    message: "Quantity must be greater than 0"
-                });
-            }
-
+                eventId: Number(eventId),
+                qty: Number(qty),
+                userId: user.id
+            };
+    
             const result = await this.ticketService.generateTicket(data);
-
+            
             res.status(201).json({
                 success: true,
                 data: result,
                 message: "Ticket generated successfully"
             });
-
+    
         } catch (error) {
+            console.error("Error:", error);
             res.status(500).json({
                 success: false,
-                message: "Failed to generate ticket"
+                message: error instanceof Error ? error.message : "Failed to generate ticket"
             });
         }
     }

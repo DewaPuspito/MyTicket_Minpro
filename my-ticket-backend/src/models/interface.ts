@@ -56,5 +56,5 @@ export interface GenerateTicket {
     qty: number,
     total_price?: number,
     userId: number,
-    eventTitle: number
+    eventId: number
 }
