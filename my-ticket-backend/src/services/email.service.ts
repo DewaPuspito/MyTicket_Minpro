@@ -1,28 +1,20 @@
 import { transporter } from "../lib/nodemailer.config";
 import { passwordResetTemplate } from "../lib/template/emailTemplate";
-import { prisma } from "../prisma/client";
+import { UserPayload } from "../models/interface";
 
 interface EmailFormat {
-    subject: string,
-    message: string,
+  user: UserPayload['name']
+  resetLink: string
 }
 
 export class EmailService {
-    public async sendBlastEmail(data: EmailFormat) {4
-
-        const result = await prisma.user.findMany({
-            select: {
-                email: true
-            }
-        })
-
-        const recipients = result.map((user) => user.email)
+    public async sendResetPassword(data: EmailFormat) {
 
         const mailOptions = {
-            from: 'HR',
-            to: recipients,
-            subject: data.subject,
-            html: passwordResetTemplate(data.subject, data.message)
+            from: process.env.EMAIL_SENDER,
+            to: data.user,
+            subject: 'Reset Password Instructions',
+            html: passwordResetTemplate(data.user, data.resetLink)
         }
 
         const info = await transporter.sendMail(mailOptions)

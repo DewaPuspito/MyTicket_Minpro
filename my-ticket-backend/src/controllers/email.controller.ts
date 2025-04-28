@@ -4,20 +4,20 @@ import { EmailService } from '../services/email.service';
 export class EmailController {
   private emailService = new EmailService();
 
-  public async blastEmail(req: Request, res: Response): Promise<void> {
+  public async resetPassword(req: Request, res: Response): Promise<void> {
     try {
 
-      const {subject, message} = req.body
+      const {email, resetLink} = req.body
 
-      if (!subject || !message) {
+      if (!email || !resetLink) {
         res.status(400).json({
-            message: 'Invalid subject or message'
+            message: 'Email and reset link are required'
         })
       }
 
-      const info = await this.emailService.sendBlastEmail({
-        subject: subject,
-        message: message
+      const info = await this.emailService.sendResetPassword({
+        user: email,  
+        resetLink: resetLink
       })
 
       res.status(200).json({

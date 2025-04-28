@@ -12,6 +12,6 @@ export class EmailRouter {
   }
 
   private routes(): void {
-    this.router.get('/email/blast', this.emailController.blastEmail.bind(this.emailController));
+    this.router.post('/email/reset-password', this.emailController.resetPassword.bind(this.emailController));
   }
 }
