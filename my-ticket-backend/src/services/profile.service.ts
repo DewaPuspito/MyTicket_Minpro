@@ -9,8 +9,6 @@ export class ProfileService {
       select: {
         name: true,
         email: true,
-        birth_date: true,
-        gender: true,
         profile_pic: true
       }
     });

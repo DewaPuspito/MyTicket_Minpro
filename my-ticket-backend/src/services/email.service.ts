@@ -3,7 +3,7 @@ import { passwordResetTemplate } from "../lib/template/emailTemplate";
 import { UserPayload } from "../models/interface";
 
 interface EmailFormat {
-  user: UserPayload['name']
+  user: UserPayload['email']
   resetLink: string
 }
 

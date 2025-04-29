@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service';
-import { UserProfile, UserRegister } from "../models/interface";
+import { UserRegister } from "../models/interface";
 
 export class AuthController {
   private authService = new AuthService();
@@ -16,8 +16,7 @@ export class AuthController {
       });
     } catch (error) {
       res.status(400).json({
-        message: "Registration failed",
-        error: (error as Error).message,
+        message: "Registration failed"
       });
     }
   }

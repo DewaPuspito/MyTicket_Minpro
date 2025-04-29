@@ -19,8 +19,6 @@ model User {
   name         String
   email        String        @unique
   password     String
-  birth_date   String
-  gender       Gender
   profile_pic  String?
   role         Role?
   refferalCode String?
@@ -121,11 +119,6 @@ model Review {
 enum Role {
   CUSTOMER
   EVENT_ORGANIZER
-}
-
-enum Gender {
-  MALE
-  FEMALE
 }
 
 enum Category {

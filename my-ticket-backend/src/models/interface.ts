@@ -1,6 +1,7 @@
 export interface UserPayload {
     id: number,
     name: string,
+    email: string,
     role: "CUSTOMER" | "EVENT_ORGANIZER" | null
 }
 
@@ -14,8 +15,6 @@ export interface UserRegister {
     name: string,
     email: string,
     password: string,
-    birth_date: string,
-    gender: 'MALE' | 'FEMALE',
     role : 'CUSTOMER' | 'EVENT_ORGANIZER',
     refferalCode? : string
 }

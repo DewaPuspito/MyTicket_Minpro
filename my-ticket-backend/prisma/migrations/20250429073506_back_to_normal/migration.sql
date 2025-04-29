@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "refferalCode" DROP NOT NULL,
+ALTER COLUMN "refferalCode" SET DATA TYPE TEXT;
