@@ -57,3 +57,22 @@ export interface GenerateTicket {
     userId: number,
     eventId: number
 }
+
+export interface VoucherInput {
+    title: string;
+    code: string;
+    discount: number;
+    expiry_date: Date;
+    userId: number;
+    eventId: number;
+}
+
+export interface VoucherQuery {
+    search?: string;
+    title?: string;
+    code?: string;
+    discount?: number;
+    expiry_date?: Date;
+    page?: number,
+    limit?: number
+}

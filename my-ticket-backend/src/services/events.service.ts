@@ -6,7 +6,7 @@ type EventCategory = 'MUSIC' | 'SPORTS' | 'BUSINESS' | 'TECHNOLOGY' | 'EDUCATION
 
 export class EventService {
   async create(data: EventInput) {
-  return await prisma.event.create({ data });
+    return await prisma.event.create({ data });
 }
 
 

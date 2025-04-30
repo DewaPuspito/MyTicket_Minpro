@@ -2,8 +2,8 @@ import { prisma } from "../prisma/client";
 import { Response, NextFunction } from "express";
 import { RequestCollection } from "../types/express";
 
-export class TicketMiddleware {
-  static async findEventForTicket(req: RequestCollection, res: Response, next: NextFunction) {
+export class TicketVoucherMiddleware {
+  static async findEventForTicketAndVoucher(req: RequestCollection, res: Response, next: NextFunction) {
     try {
       const eventId = Number(req.body.eventId);
       
@@ -23,8 +23,7 @@ export class TicketMiddleware {
       req.event = event;
       next();
     } catch (error) {
-      console.error('Find event error:', error);
-      res.status(500).json({ message: 'Failed to find event' });
+        res.status(500).json({ message: 'Failed to find event' });
     }
   }
 }

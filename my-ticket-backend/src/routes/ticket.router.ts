@@ -3,7 +3,7 @@ import { TicketController } from '../controllers/ticket.controller';
 import { AuthenticationMiddleware } from '../middlewares/authentication.middleware';
 import { AuthorizationMiddleware } from '../middlewares/authorization.middleware';
 import { ValidationMiddleware } from '../middlewares/validation.middlewares';
-import { TicketMiddleware } from '../middlewares/ticket.middleware';
+import { TicketVoucherMiddleware } from '../middlewares/ticket.voucher.middleware';
 import { ticketSchema } from '../lib/validation/ticket.validation.schema';
 
 export class TicketRouter {
@@ -17,6 +17,6 @@ export class TicketRouter {
   }
 
   private routes(): void {
-    this.router.post('/generate-ticket', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles('CUSTOMER'), TicketMiddleware.findEventForTicket, ValidationMiddleware.validate(ticketSchema), this.ticketController.generateTicket.bind(this.ticketController));
+    this.router.post('/generate-ticket', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles('CUSTOMER'), TicketVoucherMiddleware.findEventForTicketAndVoucher, ValidationMiddleware.validate(ticketSchema), this.ticketController.generateTicket.bind(this.ticketController));
   }
 }

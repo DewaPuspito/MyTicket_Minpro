@@ -29,6 +29,7 @@ model User {
   Coupon       Coupon[]
   Transaction  Transaction[]
   Review       Review[]
+  Voucher      Voucher[]
 }
 
 model Event {
@@ -67,10 +68,13 @@ model Ticket {
 
 model Voucher {
   id          Int           @id @default(autoincrement())
+  userId      Int
   eventId     Int
+  title       String
   code        String        @unique
   discount    Int
   expiry_date DateTime
+  user        User          @relation(fields: [userId], references: [id])
   event       Event         @relation(fields: [eventId], references: [id])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime?     @default(now())

@@ -23,7 +23,6 @@ export class EventMiddleware {
       req.event = event;
       next();
     } catch (error) {
-      console.error('Find event error:', error);
       res.status(500).json({ message: 'Failed to find event' });
     }
   }
