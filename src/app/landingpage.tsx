@@ -11,53 +11,8 @@ import { CalendarPlus } from "lucide-react";
 import { useRouter } from "next/navigation"; 
 import  { motion } from "framer-motion";
 import { events } from "@/data/event";
+import Navbar from "@/app/components/navbar";
 
-
-
-// const events = [
-//   {
-//     id: 1,
-//     title: "Tech Conference 2025",
-//     date: "2025-05-12",
-//     description: "Explore the future of technology at this year's biggest tech event.",
-//     image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2012&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-//   },
-//   {
-//     id: 2,
-//     title: "Art & Design Expo",
-//     date: "2025-06-20",
-//     description: "A showcase of the most creative works in design and fine art.",
-//     image: "https://images.unsplash.com/photo-1743119638006-a01d4625745d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//   },
-//   {
-//     id: 3,
-//     title: "Startup Pitch Night",
-//     date: "2025-07-05",
-//     description: "Watch startups pitch their innovative ideas to investors.",
-//     image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
-//   },
-//   {
-//     id: 4,
-//     title: "Music Festival Summer",
-//     date: "2025-08-15",
-//     description: "Join thousands for an unforgettable music experience.",
-//     image: "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80",
-//   },
-//   {
-//     id: 5,
-//     title: "Culinary Food Fair",
-//     date: "2025-09-10",
-//     description: "Taste dishes from the best chefs around the world. feel it",
-//     image: "https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=800&q=80",
-//   },
-//   {
-//     id: 6,
-//     title: "Health & Wellness Retreat",
-//     date: "2025-10-01",
-//     description: "Relax, recharge, and learn about holistic wellness. feel it",
-//     image: "https://media.istockphoto.com/id/2178386158/photo/homemade-natural-cosmetics-organic-beauty-products.webp?a=1&b=1&s=612x612&w=0&k=20&c=2BiNDoCzRz6mcDSFSk0yMUwAoAcmzczbEXw4q1GvZsQ=",
-//   },
-// ];
 
 function UserProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -74,8 +29,9 @@ function UserProfileDropdown() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border">
           <div className="px-4 py-2 text-sm text-gray-700">
+            {/* <p className="font-medium">john doe</p> */}
             <p className="font-medium">john.doe@email.com</p>
-            <p className="text-xs text-green-800">Promotor</p>
+            <p className="text-xs text-green-800">Customer</p>
           </div>
 
           <hr className="my-1" />
@@ -100,7 +56,7 @@ function UserProfileDropdown() {
 
             <button className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
               <LogOut className="w-4 h-4 mr-3" />
-              Keluar
+              Log Out
             </button>
           </div>
         </div>
@@ -122,56 +78,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f8fafc] to-[#e2e8f0]">
-      {/* Enhanced Header */}
-      <header className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white px-6 py-4 flex flex-col md:flex-row justify-between items-center shadow-lg sticky top-0 z-50">
-        <div className="flex items-center mb-4 md:mb-0">
-          <Image
-            src="/myticket.png"
-            alt="Eventify Logo"
-            width={80}
-            height={80}
-            className="object-contain mr-2"
-          />
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-white">
-            myTicket
-          </h1>
-        </div>
-
-        <div className="relative w-full md:w-1/3 mb-4 md:mb-0">
-          <Input
-            placeholder="Search events by title or description..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/20 text-white placeholder:text-gray-200 border-none rounded-full pl-10 pr-4 py-2 focus:ring-2 focus:ring-blue-300 transition-all"
-          />
-          <div className="absolute left-3 top-2.5 text-gray-200">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="#">
-            <Button className="flex items-center gap-x-2 border border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 transition-all rounded-full px-6">
-              <CalendarPlus className="w-4 h-4" />
-              Create Event
-            </Button>
-          </Link>
-          <Link href="./auth/signup">
-            <Button className="border border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 transition-all rounded-full px-6">
-              Register
-            </Button>
-          </Link>
-          <Link href="./auth/signin">
-            <Button className="bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:from-blue-500 hover:to-blue-700 shadow-lg rounded-full px-6 transition-all transform hover:scale-105">
-              Login
-            </Button>
-          </Link>
-          <UserProfileDropdown />
-        </div>
-      </header>
-
+      
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white py-12 px-6">
         <div className="max-w-6xl mx-auto text-center">
