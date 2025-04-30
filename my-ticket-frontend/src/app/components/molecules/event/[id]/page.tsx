@@ -1,15 +1,17 @@
 "use client";
-
 import { useParams, useRouter } from "next/navigation";
 import { events } from "@/data/event";
 import { Button } from "@/app/components/atomics/button";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, MapPin, Clock, Ticket } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin, Clock, Ticket, Minus, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "@/app/utils/motion";
 
+import { useState } from "react";
+
 export default function EventDetailPage() {
+  const [ticketCount, setTicketCount] = useState(1);
   const { id } = useParams();
   const router = useRouter();
 
@@ -38,6 +40,16 @@ export default function EventDetailPage() {
     );
   }
 
+  const increaseTicket = () => {
+    if (ticketCount < event.remainingTickets) {
+      setTicketCount((prev) => prev + 1);
+    }
+  };
+
+  const decreaseTicket = () => {
+    setTicketCount((prev) => Math.max(1, prev - 1));
+  };
+
   return (
     <motion.div
       variants={staggerContainer()}
@@ -45,24 +57,12 @@ export default function EventDetailPage() {
       animate="show"
       className="min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] p-6"
     >
-      {/* Back Button */}
-      {/* <motion.div variants={fadeIn('right', 'tween', 0.2, 1)} className="mb-8">
-        <Button
-          className="flex items-center gap-2 bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md text-gray-600 hover:text-gray-900 rounded-xl px-6 py-3 transition-all"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Back</span>
-        </Button>
-      </motion.div> */}
-
       {/* Event Detail Card */}
       <div className="max-w-6xl mx-auto">
         <motion.div
           variants={fadeIn('up', 'tween', 0.4, 1)}
           className="bg-white shadow-2xl rounded-2xl overflow-hidden transition-shadow hover:shadow-3xl"
         >
-          {/* Image Section with Gradient Overlay */}
           <div className="relative h-96 w-full group">
             <Image
               src={event.image}
@@ -107,21 +107,16 @@ export default function EventDetailPage() {
             className="p-8 space-y-8"
           >
             <motion.div variants={fadeIn('up', 'tween', 0.3, 1)} className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Event Details */}
               <div className="md:col-span-2 space-y-6">
                 <div className="flex items-center text-lg text-gray-600">
                   <Clock className="w-6 h-6 mr-3 text-indigo-600" />
-                  <span>
-                    {event.time}
-                  </span>
+                  <span>{event.time}</span>
                 </div>
-
                 <div className="prose prose-lg text-gray-600">
                   {event.description}
                 </div>
               </div>
 
-              {/* Ticket Card */}
               <motion.div
                 variants={fadeIn('left', 'tween', 0.5, 1)}
                 className="bg-indigo-50 p-6 rounded-xl h-fit sticky top-8"
@@ -134,10 +129,20 @@ export default function EventDetailPage() {
 
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">General Admission</span>
+                      <span className="text-gray-600">Fee</span>
                       <span className="font-bold text-gray-900">
-                        {event.price ? `Rp. ${event.price}` : 'FREE'}
+                        {event.price ? `Rp. ${(event.price * ticketCount).toLocaleString("id-ID")}` : 'FREE'}
                       </span>
+                    </div>
+
+                    <div className="flex items-center justify-center bg-black-400 gap-4 my-4">
+                      <Button onClick={decreaseTicket} className="bg-black hover:bg-gray-300 text-gray-700 rounded-full px-4 py-2">
+                        <Minus className="w-4 h-4" />
+                      </Button>
+                      <span className="text-xl font-bold">{ticketCount}</span>
+                      <Button onClick={increaseTicket} className="bg-black hover:bg-gray-300 text-gray-700 rounded-full px-4 py-2">
+                        <Plus className="w-4 h-4" />
+                      </Button>
                     </div>
 
                     <Button
@@ -148,25 +153,13 @@ export default function EventDetailPage() {
                     </Button>
 
                     <div className="text-sm text-center text-gray-500 mt-2">
-                      {event.remainingTickets ?
-                        `${event.remainingTickets} seats remaining` :
-                        'Limited availability'}
+                      {event.remainingTickets
+                        ? `${event.remainingTickets} tickets remaining`
+                        : 'Limited availability'}
                     </div>
                   </div>
                 </div>
               </motion.div>
-            </motion.div>
-
-            {/* Additional Actions */}
-            <motion.div
-              variants={fadeIn('up', 'tween', 0.4, 1)}
-              className="flex flex-wrap gap-4 justify-center"
-            >
-              <Link href="/" className="flex-1 md:flex-none">
-                <Button className="w-full bg-blue-500 hover:bg-gray-400 text-gray-600 rounded-xl py-6 transition-all">
-                  Explore More Events
-                </Button>
-              </Link>
             </motion.div>
           </motion.div>
         </motion.div>

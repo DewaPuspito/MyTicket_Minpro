@@ -13,7 +13,7 @@ export default function ProfilePage() {
                 <div>
                     <div className="flex items-center justify-center mb-4 md:mb-0">
                         <Image
-                            src="/myticket.png"
+                            src="/logo-transparent.png"
                             alt="Eventify Logo"
                             width={80}
                             height={80}
