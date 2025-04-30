@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import cors from 'cors';
 import { AuthRouter } from './routes/auth.router';
 import { EventRouter } from './routes/events.router';
 import { ProfileRouter } from './routes/profile.router';
