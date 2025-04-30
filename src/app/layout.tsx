@@ -1,7 +1,10 @@
-import "./globals.css";
-import type { Metadata } from "next";
+// app/layout.tsx
+"use client";
+
+import { usePathname } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
-import NavbarWrapper from "@/app/components/navbarwrapper"; // Ganti
+import "./globals.css";
+import Navbar from "@/app/components/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,20 +16,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "myTicket",
-  description: "Discover and book events easily",
-};
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  // Daftar path yang tidak ingin menampilkan navbar
+  const hideNavbarRoutes = ["/signin", "/signup", "/event/[id]"];
+
+  const hideNavbar = hideNavbarRoutes.some((route) =>
+    pathname.startsWith(route.replace("[id]", ""))
+  );
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NavbarWrapper /> {/* Ganti dari Navbar */}
+        {!hideNavbar && <Navbar />}
         {children}
       </body>
     </html>

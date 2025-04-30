@@ -4,7 +4,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
 
-const HIDDEN_PATHS = ["/auth/signin", "/auth/signup"];
+const HIDDEN_PATHS = ["/auth/signin", "/auth/signup", "/event/[id]"];
 
 export default function NavbarWrapper() {
   const pathname = usePathname();
