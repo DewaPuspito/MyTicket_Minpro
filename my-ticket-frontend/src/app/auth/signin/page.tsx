@@ -1,11 +1,41 @@
 // app/signup/page.tsx
 'use client'
 
+import api from "@/app/utils/api/myticket.api";
 import { Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SigninPage() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!email || !password) {
+            alert("Please fill in both email and password.");
+            return;
+        }
+
+        try {
+            const response = await api.post('/auth/login', {
+                email,
+                password
+            });
+            
+            localStorage.setItem('username', response.data.data.name);
+            localStorage.setItem('role', response.data.data.role);
+            localStorage.setItem('token', response.data.data.access_token);
+            router.push('/');
+        } catch (error) {
+            console.error('Login failed:', error);
+        }
+    };
+
     return (
       <div className="min-h-screen bg-gradient-to-r from-[#002459] to-[#0d1e4a] flex items-center justify-center p-4">
 
@@ -13,7 +43,7 @@ export default function SigninPage() {
                 {/* Header Section */}
                 <div className="mb-10 flex flex-col items-center justify-center text-center space-y-3">
                      <Image
-                                src="/myticket.png"
+                                src="/logo-transparent.png"
                                 alt="Eventify Logo"
                                 width={80}
                                 height={80}
@@ -25,7 +55,7 @@ export default function SigninPage() {
                 </div>
 
                 {/* Form Section */}
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Email Input */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-white/90">Email</label>
@@ -34,6 +64,8 @@ export default function SigninPage() {
                             <Mail className="text-white/60" size={20} />
                             <input
                                 type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter Your Email"
                                 className="w-full bg-transparent text-white placeholder-white/60 
                                     focus:outline-none"
@@ -47,6 +79,8 @@ export default function SigninPage() {
                             <Mail className="text-white/60" size={20} />
                             <input
                                 type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter Your Password"
                                 className="w-full bg-transparent text-white placeholder-white/60 
                                     focus:outline-none"

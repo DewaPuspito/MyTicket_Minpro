@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { events } from "@/data/event";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/atomics/button";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "@/app/utils/motion";

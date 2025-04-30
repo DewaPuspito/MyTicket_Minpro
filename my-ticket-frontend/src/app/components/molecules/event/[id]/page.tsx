@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { events } from "@/data/event";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/atomics/button";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, MapPin, Clock, Ticket } from "lucide-react";
