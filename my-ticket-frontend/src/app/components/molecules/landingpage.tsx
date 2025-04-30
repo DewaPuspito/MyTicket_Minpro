@@ -2,82 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Input } from "@/app/components/atomics/input";
 import { Button } from "@/app/components/atomics/button";
 import { Card, CardContent } from "@/app/components/atomics/card";
 import Image from "next/image";
 import { User, Ticket, Settings, LogOut, Info } from "lucide-react";
-import { CalendarPlus } from "lucide-react";
-import { useRouter } from "next/navigation"; 
-import  { motion } from "framer-motion";
 import { events } from "@/data/event";
-import Navbar from "@/app/components/navbar";
+import Navbar from "@/app/components/atomics/navbar";
 
-
-function UserProfileDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full hover:bg-white/60 transition"
-      >
-        <User className="w-6 h-6 text-white" />
-      </button>
-
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border">
-          <div className="px-4 py-2 text-sm text-gray-700">
-            {/* <p className="font-medium">john doe</p> */}
-            <p className="font-medium">john.doe@email.com</p>
-            <p className="text-xs text-green-800">Customer</p>
-          </div>
-
-          <hr className="my-1" />
-
-          <div className="space-y-1">
-            <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              <Info className="w-4 h-4 mr-3" />
-              Information
-            </button>
-
-            <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              <Ticket className="w-4 h-4 mr-3" />
-              My Ticket
-            </button>
-
-            <Link href="/settings" className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              <Settings className="w-4 h-4 mr-3" />
-              Settings
-            </Link>
-
-            <hr className="my-1" />
-
-            <button className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-              <LogOut className="w-4 h-4 mr-3" />
-              Log Out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function LandingPage() {
   const [search, setSearch] = useState("");
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(search.toLowerCase()) ||
     event.description.toLowerCase().includes(search.toLowerCase())
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-
-
+  )
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f8fafc] to-[#e2e8f0]">
+      <Navbar />
       
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white py-12 px-6">
@@ -140,7 +82,7 @@ export default function LandingPage() {
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold text-gray-800 mb-2">{event.title}</h3>
                   <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
-                  <Link href={`components/molecules/event/${event.id}`} className="block">
+                  <Link href={`event/${event.id}`} className="block">
                     <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-lg py-2 transition-all transform hover:scale-[1.02]">
                       View Details
                     </Button>

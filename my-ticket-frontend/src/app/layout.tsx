@@ -4,7 +4,7 @@
 import { usePathname } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/app/components/navbar";
+import Navbar from "@/app/components/atomics/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {!hideNavbar && <Navbar />}
         {children}
       </body>
     </html>
