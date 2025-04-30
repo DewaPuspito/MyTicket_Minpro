@@ -44,6 +44,11 @@ export class EventService {
     }) 
   }
 
+  async findById(id: number) {
+    return await prisma.event.findUnique({
+      where: { id }
+    });
+  }
 
   async update(id: number, data: Partial<EventInput>) {
     return prisma.event.update({ where: { id }, data: {...data, updatedAt: new Date()} })

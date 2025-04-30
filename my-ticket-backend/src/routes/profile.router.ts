@@ -13,7 +13,7 @@ export class ProfileRouter {
   }
 
   private routes(): void {
-    this.router.get('/profile/show_profile/:id', AuthenticationMiddleware.verifyToken, this.profileController.getProfile.bind(this.profileController));
+    this.router.get('/profile/show_profile/:id', AuthenticationMiddleware.verifyToken, AuthenticationMiddleware.checkUserOwnership, this.profileController.getProfile.bind(this.profileController));
     this.router.put('/profile/update_profile/:id', AuthenticationMiddleware.verifyToken, AuthenticationMiddleware.checkUserOwnership, this.profileController.updateProfile.bind(this.profileController));
   }
 }

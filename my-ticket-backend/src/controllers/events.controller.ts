@@ -53,6 +53,28 @@ export class EventController {
     }
   }
 
+  public async findById (req: Request, res: Response): Promise<void>  {
+    try {
+      const { id } = req.params;
+      const event = await this.eventService.findById(parseInt(id));
+  
+      if (!event) {
+        res.status(404).json({
+          message: 'Event not found'
+        });
+      }
+  
+      res.status(200).json({
+        message: 'Get event success',
+        data: event
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  };
+
   public async update(req: RequestCollection, res: Response) {
     try {
       const { id } = req.params;
