@@ -13,6 +13,13 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [generatedReferral, setGeneratedReferral] = useState("");
+
+  const generateReferralCode = (name: string) => {
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `${name.split(" ")[0].toLowerCase()}${random}`;
+  };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,13 +29,26 @@ export default function SignupPage() {
       return;
     }
 
+    const newReferralCode = generateReferralCode(name);
+    setGeneratedReferral(newReferralCode);
+
+    // Simulasi kirim data ke backend
+    console.log({
+      name,
+      email,
+      password,
+      role,
+      referredBy: referralCode || null,
+      referralCode: newReferralCode,
+    });
+
+    alert(`Registered successfully!\nYour referral code: ${newReferralCode}`);
     router.push("./signin");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-[#002459] to-[#0d1e4a] flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-        
         {/* Header */}
         <div className="flex flex-col items-center text-center space-y-3 mb-8">
           <Image
@@ -107,7 +127,19 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Referral Code */}
+          <div className="space-y-1">
+            <label className="text-sm text-white/90 font-medium">Referral Code (Optional)</label>
+            <input
+              type="text"
+              placeholder="Enter Referral Code"
+              className="w-full bg-white/5 text-white border border-white/20 rounded-lg px-4 py-3 placeholder-white/60 focus:outline-none focus:border-blue-400"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+            />
+          </div>
+
+          {/* Submit */}
           <motion.button
             type="submit"
             whileHover={{ scale: 1.02 }}
