@@ -17,6 +17,6 @@ export class TicketRouter {
   }
 
   private routes(): void {
-    this.router.post('/generate-ticket', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles('CUSTOMER'), TicketVoucherMiddleware.findEventForTicketAndVoucher, ValidationMiddleware.validate(ticketSchema), this.ticketController.generateTicket.bind(this.ticketController));
+    this.router.post('/event/:eventId/generate-ticket', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles('CUSTOMER'), TicketVoucherMiddleware.findEventForTicketAndVoucher, ValidationMiddleware.validate(ticketSchema), this.ticketController.generateTicket.bind(this.ticketController));
   }
 }

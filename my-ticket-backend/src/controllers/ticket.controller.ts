@@ -12,7 +12,8 @@ export class TicketController {
 
     public async generateTicket(req: RequestCollection, res: Response): Promise<void> {
         try {
-            const { eventId, qty } = req.body;
+            const { qty } = req.body;
+            const eventId = req.params.eventId;
             const user = req.user;
     
             if (!eventId || !qty) {
@@ -28,7 +29,7 @@ export class TicketController {
             if (isNaN(quantity) || isNaN(eventIdNum)) {
                 res.status(400).json({
                     success: false,
-                    message: "Invalid number format for eventId or qty"
+                    message: "Invalid input format"
                 });
             }
     
@@ -59,7 +60,7 @@ export class TicketController {
                                message.includes("Quantity must be greater") ? 400 : 500;
             res.status(statusCode).json({
                 success: false,
-                message: "Failed to generate ticket"
+                message: message
             });
         }
     }

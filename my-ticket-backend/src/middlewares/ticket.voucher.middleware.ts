@@ -5,7 +5,7 @@ import { RequestCollection } from "../types/express";
 export class TicketVoucherMiddleware {
   static async findEventForTicketAndVoucher(req: RequestCollection, res: Response, next: NextFunction) {
     try {
-      const eventId = Number(req.body.eventId);
+      const eventId = Number(req.params.eventId);
       
       if (isNaN(eventId)) {
         res.status(400).json({ message: 'Invalid event ID' });

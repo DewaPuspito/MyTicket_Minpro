@@ -5,7 +5,6 @@ export const voucherSchema = ({
     title: zod.string().min(3),
     code: zod.string().min(3),
     discount: zod.number().int().min(0),
-    expiry_date: zod.coerce.date(),
-    eventId: zod.number().int().positive()
+    expiry_date: zod.coerce.date()
   }),
 });
