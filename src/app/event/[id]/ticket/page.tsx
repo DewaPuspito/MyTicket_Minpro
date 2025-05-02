@@ -235,7 +235,7 @@ export default function TicketPage() {
                 </div>
 
                 {/* Attendee Info */}
-                <div>
+                {/* <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center">
                     <User className="w-5 h-5 mr-2 text-indigo-600" />
                     Attendee Information
@@ -272,7 +272,7 @@ export default function TicketPage() {
                       <p className="text-red-500 mt-2">{errors.attendee}</p>
                     )}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Payment Section */}
                 <div>
