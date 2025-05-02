@@ -34,8 +34,10 @@ function UserProfileDropdown({ onLogout }: UserProfileDropdownProps) {
                     <hr className="my-1" />
                     <div className="space-y-1">
                         <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <Link href="components/molecules/profile/detail" className="w-full flex items-center text-sm text-gray-700 hover:bg-gray-100">
                             <Info className="w-4 h-4 mr-3" />
                             Information
+                        </Link>
                         </button>
                         <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <Ticket className="w-4 h-4 mr-3" />
@@ -76,6 +78,7 @@ export default function Navbar() {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('username');
+        localStorage.removeItem('userId');
         setIsLoggedIn(false);
         setUserRole('');
         router.push('/');

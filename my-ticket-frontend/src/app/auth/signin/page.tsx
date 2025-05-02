@@ -27,6 +27,7 @@ export default function SigninPage() {
                 password
             });
             
+            localStorage.setItem('userId', response.data.data.id);
             localStorage.setItem('username', response.data.data.name);
             localStorage.setItem('role', response.data.data.role);
             localStorage.setItem('token', response.data.data.access_token);

@@ -14,7 +14,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [referralCode, setReferralCode] = useState("");
+  const [refferalCode, setReferralCode] = useState("");
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,15 +30,16 @@ export default function SignupPage() {
         email,
         password,
         role: role === 'promotor' ? 'EVENT_ORGANIZER' : 'CUSTOMER',
-        referralCode: referralCode || undefined
+        refferalCode: refferalCode || undefined
       });
 
-      if (response.data.success) {
-        alert('Registrasi berhasil! Silakan login.');
-        router.push('./signin');
-      }
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Terjadi kesalahan saat registrasi');
+        localStorage.setItem('userId', response.data.data.id);
+        localStorage.setItem('username', response.data.data.name);
+        localStorage.setItem('role', response.data.data.role);
+        localStorage.setItem('token', response.data.data.access_token);
+        router.push('/');
+    } catch (error) {
+      alert('Terjadi kesalahan saat registrasi');
     }
   };
 
@@ -130,7 +131,7 @@ export default function SignupPage() {
               type="text"
               placeholder="Enter Referral Code"
               className="w-full bg-white/5 text-white border border-white/20 rounded-lg px-4 py-3 placeholder-white/60 focus:outline-none focus:border-blue-400"
-              value={referralCode}
+              value={refferalCode}
               onChange={(e) => setReferralCode(e.target.value)}
             />
           </div>

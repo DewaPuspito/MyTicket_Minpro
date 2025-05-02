@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 export default function EventForm() {
   interface Organizer {
@@ -175,7 +177,7 @@ export default function EventForm() {
                 type="number"
                 name="price"
                 min={0}
-                step={1000}
+                step={10000}
                 value={formData.price}
                 onChange={handleChange}
                 className={`w-full border rounded-lg p-3 focus:outline-none focus:ring-2 ${errors.price ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-blue-300'}`}

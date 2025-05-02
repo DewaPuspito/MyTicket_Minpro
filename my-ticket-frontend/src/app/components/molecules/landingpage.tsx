@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/app/components/atomics/button";
 import { Card, CardContent } from "@/app/components/atomics/card";
+import {Input} from "@/app/components/atomics/input";
 import Image from "next/image";
-import { User, Ticket, Settings, LogOut, Info } from "lucide-react";
 import { events } from "@/data/event";
 import Navbar from "@/app/components/atomics/navbar";
 
@@ -42,6 +42,17 @@ export default function LandingPage() {
       {/* Main Content */}
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Upcoming Events</h2>
+
+        {/* Search bar */}
+        <div className="flex justify-center mb-10">
+           <Input
+             type="text"
+             placeholder="Search event title or description..."
+             value={search}
+             onChange={(e) => setSearch(e.target.value)}
+             className="w-full max-w-xl bg-white text-gray-800 border border-gray-300 rounded-full px-6 py-3 shadow-sm focus:ring-2 focus:ring-blue-500"
+           />
+         </div>
 
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12">
