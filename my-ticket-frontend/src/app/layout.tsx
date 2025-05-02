@@ -1,7 +1,4 @@
-// app/layout.tsx
-"use client";
-
-import { usePathname } from "next/navigation";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/app/components/atomics/navbar";
@@ -16,16 +13,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+export const metadata: Metadata = {
+  title: "myTicket",
+  description: "Discover and book events easily",
+};
 
-  // Daftar path yang tidak ingin menampilkan navbar
-  const hideNavbarRoutes = ["/signin", "/signup", "/event/[id]"];
-
-  const hideNavbar = hideNavbarRoutes.some((route) =>
-    pathname.startsWith(route.replace("[id]", ""))
-  );
-
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
