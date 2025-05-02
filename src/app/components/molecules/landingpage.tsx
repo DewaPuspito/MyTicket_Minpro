@@ -2,68 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Input } from "@/app/components/ui/input";
-import { Button } from "@/app/components/ui/button";
-import { Card, CardContent } from "@/app/components/ui/card";
+import { Input } from "@/app/components/atomics/input";
+import { Button } from "@/app/components/atomics/button";
+import { Card, CardContent } from "@/app/components/atomics/card";
 import Image from "next/image";
-import { User, Ticket, Settings, LogOut, Info } from "lucide-react";
-import { CalendarPlus } from "lucide-react";
-import { useRouter } from "next/navigation"; 
-import  { motion } from "framer-motion";
 import { events } from "@/data/event";
-import Navbar from "@/app/components/navbar";
-
-
-function UserProfileDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full hover:bg-white/60 transition"
-      >
-        <User className="w-6 h-6 text-white" />
-      </button>
-
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border">
-          <div className="px-4 py-2 text-sm text-gray-700">
-            {/* <p className="font-medium">john doe</p> */}
-            <p className="font-medium">john.doe@email.com</p>
-            <p className="text-xs text-green-800">Customer</p>
-          </div>
-
-          <hr className="my-1" />
-
-          <div className="space-y-1">
-            <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              <Info className="w-4 h-4 mr-3" />
-              Information
-            </button>
-
-            <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              <Ticket className="w-4 h-4 mr-3" />
-              My Ticket
-            </button>
-
-            <Link href="/settings" className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              <Settings className="w-4 h-4 mr-3" />
-              Settings
-            </Link>
-
-            <hr className="my-1" />
-
-            <button className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-              <LogOut className="w-4 h-4 mr-3" />
-              Log Out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+import { User, Ticket, Settings, LogOut, Info, CalendarPlus } from "lucide-react";
+import Navbar from "@/app/components/atomics/navbar";
 
 export default function LandingPage() {
   const [search, setSearch] = useState("");
@@ -71,14 +16,9 @@ export default function LandingPage() {
     event.title.toLowerCase().includes(search.toLowerCase()) ||
     event.description.toLowerCase().includes(search.toLowerCase())
   );
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-
-
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f8fafc] to-[#e2e8f0]">
-      
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white py-12 px-6">
         <div className="max-w-6xl mx-auto text-center">
@@ -86,20 +26,24 @@ export default function LandingPage() {
           <p className="text-xl text-blue-100 max-w-2xl mx-auto mb-8">
             Find, book, and enjoy the best events in town. From concerts to conferences, we've got you covered.
           </p>
-          <div className="flex justify-center gap-4">
-            <Button className="border-2 border-white text-white bg-transparent hover:bg-white/10 px-8 py-6 text-lg rounded-full font-semibold transition-all">
-              Browse Events
-            </Button>
-            <Button className="border-2 border-white text-white bg-transparent hover:bg-white/10 px-8 py-6 text-lg rounded-full font-semibold transition-all">
-              How It Works
-            </Button>
-          </div>
         </div>
       </section>
 
       {/* Main Content */}
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+        
+
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Upcoming Events</h2>
+        {/* Search bar */}
+        <div className="flex justify-center mb-10">
+          <Input
+            type="text"
+            placeholder="Search event title or description..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full max-w-xl bg-white text-gray-800 border border-gray-300 rounded-full px-6 py-3 shadow-sm focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12">
@@ -126,14 +70,15 @@ export default function LandingPage() {
                     alt={event.title}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <p className="text-white font-medium">{new Date(event.startDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}</p>
+                    <p className="text-white font-medium">
+                      {new Date(event.startDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
                   </div>
                 </div>
 
@@ -158,7 +103,7 @@ export default function LandingPage() {
           <div>
             <h4 className="text-xl font-bold mb-4 flex items-center">
               <Image
-                src="/myticket.png"
+                src="/logo-transparent.png"
                 alt="Eventify Logo"
                 width={40}
                 height={40}

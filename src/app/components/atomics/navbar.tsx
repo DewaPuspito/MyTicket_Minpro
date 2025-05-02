@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Input } from '@/app/components/ui/input';
-import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/atomics/input';
+import { Button } from '@/app/components/atomics/button';
 import { CalendarPlus, User, Ticket, Settings, LogOut, Info } from 'lucide-react';
 import { useState } from 'react';
 
@@ -66,7 +66,7 @@ export default function Navbar() {
                 />
             </Link>
 
-            <div className="relative w-full md:w-1/3 mb-4 md:mb-0">
+            {/* <div className="relative w-full md:w-1/3 mb-4 md:mb-0">
                 <Input
                     placeholder="Search events..."
                     value={search}
@@ -78,7 +78,7 @@ export default function Navbar() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center gap-3">
                 <Link href="/create_event">

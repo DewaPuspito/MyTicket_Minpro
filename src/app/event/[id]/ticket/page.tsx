@@ -1,8 +1,7 @@
 "use client";
-
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { events } from "@/data/event";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/atomics/button";
 import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "@/app/utils/motion";
 import {
@@ -10,30 +9,73 @@ import {
   MapPin,
   Ticket,
   User,
-  CreditCard,
   ArrowLeft,
   Banknote,
   Smartphone,
+  Loader,
+  CreditCard,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { formatPrice } from "@/app/utils/formatter"; // Pastikan path benar
+
+interface Attendee {
+  name: string;
+  email: string;
+}
 
 export default function TicketPage() {
   const { id } = useParams();
   const router = useRouter();
-  const event = events.find((event) => event.id === Number(id));
-  const [ticketCount, setTicketCount] = useState(1);
-  const [attendees, setAttendees] = useState<
-    Array<{ name: string; email: string }>
-  >([]);
+  const searchParams = useSearchParams();
+  const ticketCount = Number(searchParams.get("count")) || 1; // Default 1 ticket
+
+  const [attendee, setAttendee] = useState<Attendee>({ name: "", email: "" });
   const [selectedPayment, setSelectedPayment] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [referralError, setReferralError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{
+    payment?: string;
+    attendee?: string;
+    referral?: string;
+  }>({});
 
-  useEffect(() => {
-    setAttendees(Array(ticketCount).fill({ name: "", email: "" }));
-  }, [ticketCount]);
+  const event = events.find((event) => event.id === Number(id));
+
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+
+    // Validasi payment method
+    if (!selectedPayment) {
+      newErrors.payment = "Please select payment method";
+    }
+
+    // Validasi attendee info
+    if (!attendee.name.trim()) newErrors.attendee = "Name is required";
+    if (!attendee.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      newErrors.attendee = "Invalid email";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Simulasi API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      router.push(`/event/${id}/ticket/success`);
+    } catch (error) {
+      console.error("Payment failed:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const validateReferral = (code: string) => {
     const validCodes: Record<string, number> = {
@@ -41,12 +83,16 @@ export default function TicketPage() {
       EVENT5: 5,
     };
     const upperCode = code.toUpperCase();
+
     if (validCodes[upperCode]) {
       setDiscount(validCodes[upperCode]);
-      setReferralError("");
+      setReferralCode("");
     } else {
       setDiscount(0);
-      setReferralError("Wrong code. Please try again.");
+      setErrors(prev => ({
+        ...prev,
+        referral: "Voucher Invalid!"
+      }));
     }
   };
 
@@ -57,15 +103,15 @@ export default function TicketPage() {
         animate={{ opacity: 1 }}
         className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 text-center p-6"
       >
-        <h1 className="text-3xl font-bold">Event Not Found</h1>
+        <h1 className="text-3xl font-bold mb-4">Event Tidak Ditemukan</h1>
+        <Button onClick={() => router.push("/")}>
+          Kembali ke Beranda
+        </Button>
       </motion.div>
     );
   }
 
-  const formatPrice = (price: string) =>
-    `Rp. ${price.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
-  const basePrice =
-    Number(event.price.toString().replace(/\./g, "")) * ticketCount;
+  const basePrice = event.price * ticketCount;
   const discountedPrice = basePrice - basePrice * (discount / 100);
 
   return (
@@ -78,42 +124,41 @@ export default function TicketPage() {
       <div className="max-w-6xl mx-auto">
         <motion.div
           variants={fadeIn("up", "tween", 0.4, 1)}
-          className="bg-white shadow-2xl rounded-2xl overflow-hidden transition-shadow hover:shadow-3xl"
+          className="bg-white shadow-2xl rounded-2xl overflow-hidden"
         >
-          <div className="bg-[#00214D] p-8 text-white">
-            <div className="flex items-center justify-between">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white py-12 px-6">
+            <div className="flex items-center justify-between mb-8">
               <Button
-                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl px-6 py-3"
+                className="btn-secondary gap-2 bg-black"
                 onClick={() => router.back()}
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span className="text-sm font-medium">Back to Event</span>
+                Kembali
               </Button>
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-2">Checkout Process</h2>
                 <div className="flex items-center justify-center space-x-4">
-                  <div className="flex items-center text-indigo-200">
-                    <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
-                      1
+                  {[1, 2].map((step) => (
+                    <div key={step} className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center 
+                        ${step === 1 ? "bg-white text-indigo-600" : "bg-indigo-500 text-white"}`}>
+                        {step}
+                      </div>
+                      {step < 2 && <div className="h-px w-12 bg-indigo-300"></div>}
                     </div>
-                    <span className="ml-2">Ticket Details</span>
-                  </div>
-                  <div className="h-px w-12 bg-indigo-300"></div>
-                  <div className="flex items-center text-indigo-200">
-                    <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
-                      2
-                    </div>
-                    <span className="ml-2">Payment</span>
-                  </div>
+                  ))}
                 </div>
               </div>
+              <div className="w-24"></div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 p-8">
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
             {/* Order Summary */}
             <motion.div variants={fadeIn("right", "tween", 0.3, 1)}>
-              <div className="border rounded-xl p-6 shadow-sm bg-indigo-50">
+              <div className="bg-indigo-50 rounded-xl p-6 shadow-sm">
                 <h3 className="text-xl font-bold mb-4 flex items-center">
                   <Ticket className="w-6 h-6 mr-2 text-indigo-600" />
                   Order Summary
@@ -121,37 +166,30 @@ export default function TicketPage() {
 
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tickets x{ticketCount}</span>
-                    <span className="font-medium">
-                      {formatPrice(event.price.toString())}
-                    </span>
+                    <span>Tiket x{ticketCount}</span>
+                    <span>{formatPrice(event.price)}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-green-600">
-                      <span>Discount ({discount}%)</span>
-                      <span>
-                        -
-                        {formatPrice(
-                          (basePrice * (discount / 100)).toString()
-                        )}
-                      </span>
+                      <span>Diskon ({discount}%)</span>
+                      <span>-{formatPrice(basePrice * (discount / 100))}</span>
                     </div>
                   )}
-                  <div className="flex justify-between border-t pt-4">
-                    <span className="font-semibold">Total</span>
-                    <span className="text-xl font-bold text-indigo-600">
-                      {formatPrice(discountedPrice.toString())}
+                  <div className="flex justify-between border-t pt-4 font-bold">
+                    <span>Total</span>
+                    <span className="text-indigo-600">
+                      {formatPrice(discountedPrice)}
                     </span>
                   </div>
                 </div>
 
                 <div className="border-t pt-6">
-                  <h4 className="text-lg font-semibold mb-4">Event Details</h4>
-                  <div className="space-y-3 text-gray-600">
+                  <h4 className="text-lg font-semibold mb-4">Event Detail</h4>
+                  <div className="space-y-3">
                     <div className="flex items-center">
                       <CalendarDays className="w-5 h-5 mr-3 text-indigo-600" />
                       <span>
-                        {new Date(event.startDate).toLocaleDateString("en-US", {
+                        {new Date(event.startDate).toLocaleDateString("id-ID", {
                           weekday: "long",
                           year: "numeric",
                           month: "long",
@@ -161,7 +199,7 @@ export default function TicketPage() {
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-5 h-5 mr-3 text-indigo-600" />
-                      <span className="flex-1">{event.location}</span>
+                      <span>{event.location}</span>
                     </div>
                   </div>
                 </div>
@@ -170,136 +208,118 @@ export default function TicketPage() {
 
             {/* Form Section */}
             <motion.div variants={fadeIn("left", "tween", 0.3, 1)}>
-              <form className="space-y-8">
-                {/* Referral Code Input */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Voucher Section */}
                 <div>
-                  <h3 className="text-xl font-bold mb-4">Voucher Code</h3>
-                  <div className="flex gap-4">
+                  <h3 className="text-lg font-semibold mb-3">Voucher Code</h3>
+                  <div className="flex gap-3">
                     <input
                       type="text"
-                      placeholder="Enter referral code"
-                      className="w-full border rounded-lg p-3 bg-gray-50 outline-none"
+                      placeholder="Enter Voucher Code"
+                      className="flex-1 border rounded-lg p-3"
                       value={referralCode}
                       onChange={(e) => setReferralCode(e.target.value)}
                     />
                     <Button
                       type="button"
+                      className="btn-secondary bg-green-500"
                       onClick={() => validateReferral(referralCode)}
-                      className="bg-indigo-600 hover:bg-indigo-700"
+                      disabled={!referralCode.trim()}
                     >
                       Apply
                     </Button>
                   </div>
-                  {discount > 0 && !referralError && (
-                    <p className="mt-2 text-green-600 font-medium">
-                      Voucher applied! {discount}% discount.
-                    </p>
-                  )}
-                  {referralError && (
-                    <p className="mt-2 text-red-600 font-medium">
-                      {referralError}
-                    </p>
+                  {errors.referral && (
+                    <p className="text-red-500 mt-2">{errors.referral}</p>
                   )}
                 </div>
 
                 {/* Attendee Info */}
                 <div>
-                  <h3 className="text-xl font-bold mb-6 flex items-center">
-                    <User className="w-6 h-6 mr-2 text-indigo-600" />
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <User className="w-5 h-5 mr-2 text-indigo-600" />
                     Attendee Information
                   </h3>
-
-                  <div className="space-y-6">
-                    {attendees.map((_, index) => (
-                      <div
-                        key={index}
-                        className="bg-white p-4 rounded-lg border shadow-sm"
-                      >
-                        <h4 className="font-medium mb-4 text-gray-700">
-                          Attendee #{index + 1}
-                        </h4>
-                        <div className="space-y-3">
-                          <div className="flex items-center border rounded-lg p-3 bg-gray-50">
-                            <User className="w-5 h-5 text-gray-400 mr-3" />
-                            <input
-                              type="text"
-                              placeholder="Full Name"
-                              className="w-full outline-none bg-transparent"
-                              required
-                              value={attendees[index]?.name}
-                              onChange={(e) => {
-                                const newAttendees = [...attendees];
-                                newAttendees[index].name = e.target.value;
-                                setAttendees(newAttendees);
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center border rounded-lg p-3 bg-gray-50">
-                            <CreditCard className="w-5 h-5 text-gray-400 mr-3" />
-                            <input
-                              type="email"
-                              placeholder="Email Address"
-                              className="w-full outline-none bg-transparent"
-                              required
-                              value={attendees[index]?.email}
-                              onChange={(e) => {
-                                const newAttendees = [...attendees];
-                                newAttendees[index].email = e.target.value;
-                                setAttendees(newAttendees);
-                              }}
-                            />
-                          </div>
+                  <div className="space-y-4">
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h4 className="font-medium mb-3">Attendee : </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Full Name"
+                            className="w-full p-2 border-b focus:outline-none"
+                            value={attendee.name}
+                            onChange={(e) =>
+                              setAttendee({ ...attendee, name: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="email"
+                            placeholder="Email"
+                            className="w-full p-2 border-b focus:outline-none"
+                            value={attendee.email}
+                            onChange={(e) =>
+                              setAttendee({ ...attendee, email: e.target.value })
+                            }
+                          />
                         </div>
                       </div>
-                    ))}
+                    </div>
+                    {errors.attendee && (
+                      <p className="text-red-500 mt-2">{errors.attendee}</p>
+                    )}
                   </div>
                 </div>
 
-                {/* Payment */}
+                {/* Payment Section */}
                 <div>
-                  <h3 className="text-xl font-bold mb-6 flex items-center">
-                    <Banknote className="w-6 h-6 mr-2 text-indigo-600" />
-                    Payment Method
-                  </h3>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {["BCA", "Mandiri", "Gopay", "OVO"].map((method) => (
-                      <div
-                        key={method}
-                        className={`p-4 border rounded-xl cursor-pointer transition-all ${
-                          selectedPayment === method
-                            ? "border-indigo-500 bg-indigo-50"
-                            : "hover:border-gray-300"
-                        }`}
-                        onClick={() => setSelectedPayment(method)}
-                      >
-                        <div className="flex items-center">
-                          <div
-                            className={`w-6 h-6 mr-3 flex items-center justify-center rounded-full ${
-                              selectedPayment === method
-                                ? "bg-indigo-500 text-white"
-                                : "bg-gray-200"
-                            }`}
-                          >
-                            {method === "Gopay" || method === "OVO" ? (
-                              <Smartphone className="w-4 h-4" />
-                            ) : (
-                              <Banknote className="w-4 h-4" />
-                            )}
-                          </div>
-                          <span className="font-medium">{method}</span>
-                        </div>
-                      </div>
-                    ))}
+                  <h3 className="text-lg font-semibold mb-3">Choose Payment Method</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        id="bankTransfer"
+                        name="paymentMethod"
+                        value="bankTransfer"
+                        onChange={() => setSelectedPayment("bankTransfer")}
+                      />
+                      <label htmlFor="bankTransfer" className="flex items-center">
+                        <Banknote className="w-5 h-5 mr-2 text-indigo-600" />
+                        Transfer Bank
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        id="creditCard"
+                        name="paymentMethod"
+                        value="creditCard"
+                        onChange={() => setSelectedPayment("creditCard")}
+                      />
+                      <label htmlFor="creditCard" className="flex items-center">
+                        <CreditCard className="w-5 h-5 mr-2 text-indigo-600" />
+                        Credit Card
+                      </label>
+                    </div>
+                    {errors.payment && (
+                      <p className="text-red-500 mt-2">{errors.payment}</p>
+                    )}
                   </div>
                 </div>
 
-                <Button
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-6 rounded-xl transition-all hover:shadow-lg"
-                  onClick={() => router.push(`/event/${id}/ticket/payment`)}
-                >
-                  Get Tickets Now
-                </Button>
+                <div className="pt-4">
+                  <Button
+                    type="button"
+                    className="w-full btn-primary bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-lg transition-all"
+                    onClick={() => router.push(`/event/${id}/ticket/payment`)}
+                  >
+                    Buy Now
+                  </Button>
+
+                </div>
               </form>
             </motion.div>
           </div>

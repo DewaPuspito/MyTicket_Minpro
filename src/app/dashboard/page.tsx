@@ -1,143 +1,255 @@
 "use client"
 import { useState } from 'react';
-import { FiMenu, FiUsers, FiBox, FiDollarSign, FiPieChart, FiSettings } from 'react-icons/fi';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area } from 'recharts';
+import { Calendar, Users, PieChart, Settings, Bell, Search, Plus, Edit3, Check, X, FileText, Tag } from 'react-feather';
+import  { User } from 'lucide-react';
+const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState('events');
+  const [selectedEvent, setSelectedEvent] = useState<{
+    id: number;
+    name: string;
+    date: string;
+    location: string;
+    ticketsSold: number;
+    status: string
+  } | null>(null);
 
-export default function AdminDashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  // Dummy data
-  const stats = [
-    { title: 'Total Users', value: '2,345', icon: <FiUsers className="text-2xl" />, color: 'bg-blue-500' },
-    { title: 'Total Products', value: '1,234', icon: <FiBox className="text-2xl" />, color: 'bg-green-500' },
-    { title: 'Revenue', value: '$45,678', icon: <FiDollarSign className="text-2xl" />, color: 'bg-purple-500' },
-    { title: 'Conversion', value: '3.2%', icon: <FiPieChart className="text-2xl" />, color: 'bg-orange-500' },
+  // Mock Data
+  const events = [
+    { id: 1, name: 'Heart2Heart Concert', date: '2025-05-15', location: 'Jakarta', ticketsSold: 1500, status: 'active' },
+    { id: 2, name: 'Tech Summit 2025', date: '2025-06-20', location: 'Bandung', ticketsSold: 850, status: 'active' },
   ];
 
-  const recentOrders = [
-    { id: '#1234', customer: 'John Doe', amount: '$150', status: 'Completed' },
-    { id: '#1235', customer: 'Jane Smith', amount: '$200', status: 'Processing' },
-    { id: '#1236', customer: 'Bob Johnson', amount: '$75', status: 'Pending' },
+  const transactions = [
+    { id: 1, user: 'john@example.com', event: 'Heart2Heart', amount: 2, total: 'Rp 1.000.000', status: 'pending', proof: 'proof1.jpg' },
+    { id: 2, user: 'sarah@mail.com', event: 'Tech Summit', amount: 1, total: 'Rp 500.000', status: 'accepted', proof: 'proof2.jpg' },
+  ];
+
+  const statsData = [
+    { month: 'Jan', sales: 4000, attendees: 2400 },
+    { month: 'Feb', sales: 3000, attendees: 1398 },
+    // ... other months
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50 font-inter">
       {/* Sidebar */}
-      <aside 
-        className={`fixed h-full bg-gray-800 text-white transition-transform duration-300 ease-in-out 
-          ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full'}`}
-      >
-        <div className="p-6 border-b border-gray-700">
-          <h2 className="text-xl font-semibold">Admin Panel</h2>
+      <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-r from-[#002459] to-[#0d1e4a] shadow-xl">
+        <div className="p-6">
+          <h2 className="text-xl font-bold text-white mb-8">Event Management</h2>
+          <nav className="space-y-2">
+            {[
+              { id: 'events', icon: <Tag size={18} />, label: 'Events' },
+              { id: 'transactions', icon: <FileText size={18} />, label: 'Transactions' },
+              { id: 'stats', icon: <PieChart size={18} />, label: 'Analytics' },
+              { id: 'attendees', icon: <Users size={18} />, label: 'Attendees' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex items-center w-full p-3 rounded-lg transition-all ${activeTab === item.id
+                    ? 'bg-white/10 text-white'
+                    : 'text-blue-100 hover:bg-white/5 hover:text-white'
+                  }`}
+              >
+                <span className="mr-3">{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </div>
-        
-        <nav className="p-4 space-y-2">
-          {[
-            { name: 'Dashboard', icon: <FiPieChart /> },
-            { name: 'Users', icon: <FiUsers /> },
-            { name: 'Products', icon: <FiBox /> },
-            { name: 'Settings', icon: <FiSettings /> },
-          ].map((item) => (
-            <button
-              key={item.name}
-              className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors
-                ${activeTab === item.name.toLowerCase() 
-                  ? 'bg-gray-700 text-white' 
-                  : 'hover:bg-gray-700 text-gray-300'}`}
-              onClick={() => setActiveTab(item.name.toLowerCase())}
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </aside>
+      </div>
 
       {/* Main Content */}
-      <main className={`flex-1 transition-margin duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
-        {/* Top Bar */}
-        <header className="flex items-center justify-between bg-white shadow-sm p-4">
-          <button 
-            className="p-2 hover:bg-gray-100 rounded-lg"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            <FiMenu className="text-xl" />
-          </button>
-          
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                  3
-                </div>
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                  AD
-                </div>
-              </div>
+      <div className="ml-64 p-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center bg-white px-4 py-3 rounded-lg shadow-sm w-96 ring-1 ring-gray-200 focus-within:ring-2 focus-within:ring-blue-500">
+            <Search size={18} className="text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search events, transactions..."
+              className="ml-3 flex-1 outline-none placeholder-gray-400"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="relative text-gray-600 hover:text-blue-600">
+              <Bell size={20} />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <div className="w-9 h-9 rounded-full bg-white border-2 border-blue-600 flex items-center justify-center">
+              <User className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-        </header>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className={`${stat.color} p-3 rounded-lg`}>
-                  {stat.icon}
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-gray-500">{stat.title}</p>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
 
-        {/* Recent Orders Table */}
-        <div className="bg-white rounded-xl shadow-sm mx-6 p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-gray-600 border-b">
-                  <th className="pb-3">Order ID</th>
-                  <th className="pb-3">Customer</th>
-                  <th className="pb-3">Amount</th>
-                  <th className="pb-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="py-4">{order.id}</td>
-                    <td>{order.customer}</td>
-                    <td>{order.amount}</td>
-                    <td>
-                      <span className={`px-3 py-1 rounded-full text-sm ${
-                        order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                        order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </td>
-                  </tr>
+        {/* Content Sections */}
+        <div className="space-y-8">
+          {activeTab === 'events' && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-semibold text-gray-800">Managed Events</h3>
+                <button className="bg-blue-600 text-white px-4 py-2.5 rounded-lg flex items-center shadow-md hover:bg-blue-700 transition-colors">
+                  <Plus size={18} className="mr-2" />
+                  New Event
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {events.map(event => (
+                  <div key={event.id} className="group border rounded-xl p-5 hover:shadow-md transition-all bg-gradient-to-r from-blue-50 to-white">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-800 mb-1.5">{event.name}</h4>
+                        <div className="flex items-center text-sm text-gray-600 space-x-3">
+                          <span className="flex items-center">
+                            <Calendar size={14} className="mr-1.5" />
+                            {event.date}
+                          </span>
+                          <span>•</span>
+                          <span>{event.location}</span>
+                        </div>
+                        <div className="mt-3 flex items-center">
+                          <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">
+                            {event.ticketsSold} tickets sold
+                          </span>
+                        </div>
+                      </div>
+                      <button className="text-gray-400 hover:text-blue-600 p-2 rounded-lg">
+                        <Edit3 size={18} />
+                      </button>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'transactions' && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">Transaction Management</h3>
+
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr className="text-left text-sm font-medium text-gray-500">
+                      <th className="px-6 py-4">User</th>
+                      <th className="px-6 py-4">Event</th>
+                      <th className="px-6 py-4">Qty</th>
+                      <th className="px-6 py-4">Total</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {transactions.map(transaction => (
+                      <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 font-medium">{transaction.user}</td>
+                        <td className="px-6 py-4">{transaction.event}</td>
+                        <td className="px-6 py-4">{transaction.amount}</td>
+                        <td className="px-6 py-4 font-semibold">{transaction.total}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${transaction.status === 'pending' ? 'bg-amber-100 text-amber-600' :
+                              transaction.status === 'accepted' ? 'bg-green-100 text-green-600' :
+                                'bg-red-100 text-red-600'
+                            }`}>
+                            {transaction.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-3">
+                            <button className="text-green-600 hover:text-green-700 p-1.5 rounded-md hover:bg-green-50">
+                              <Check size={18} />
+                            </button>
+                            <button className="text-red-600 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50">
+                              <X size={18} />
+                            </button>
+                            <button className="text-blue-600 hover:text-blue-700 p-1.5 rounded-md hover:bg-blue-50">
+                              View Proof
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'stats' && (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">Event Analytics</h3>
+
+              <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-2 bg-white border rounded-lg px-4 py-2 shadow-sm">
+                  <select className="outline-none text-gray-700">
+                    <option>Yearly</option>
+                    <option>Monthly</option>
+                    <option>Daily</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2 bg-white border rounded-lg px-4 py-2 shadow-sm">
+                  <select className="outline-none text-gray-700">
+                    <option>2025</option>
+                    <option>2024</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="p-6 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-100">
+                  <h4 className="text-lg font-semibold mb-4">Sales Performance</h4>
+                  <LineChart width={400} height={200} data={statsData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis dataKey="month" stroke="#6b7280" />
+                    <YAxis stroke="#6b7280" />
+                    <Tooltip
+                      contentStyle={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="sales"
+                      stroke="#3b82f6"
+                      fill="#bfdbfe"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </div>
+
+                <div className="p-6 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-100">
+                  <h4 className="text-lg font-semibold mb-4">Attendee Overview</h4>
+                  <BarChart width={400} height={200} data={statsData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis dataKey="month" stroke="#6b7280" />
+                    <YAxis stroke="#6b7280" />
+                    <Tooltip
+                      contentStyle={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Bar
+                      dataKey="attendees"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
