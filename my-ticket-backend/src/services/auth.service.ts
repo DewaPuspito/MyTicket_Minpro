@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { JwtUtils } from "../lib/token.config";
 import bcrypt, { hash } from "bcrypt";
 import { UserRegister } from "../models/interface";
+import { EmailService } from "./email.service";
 
 export class AuthService {
 
@@ -173,6 +174,15 @@ export class AuthService {
       access_token: token,
     };
   }
+
+public async verifyResetToken(token: string) {
+    try {
+        const decoded = JwtUtils.verifyToken(token);
+        return decoded.email;
+    } catch (error) {
+        throw new Error("Token invalid or expired");
+    }
+}
 
   public async resetPassword(email: string, newPassword: string) {
     if (!email || !newPassword) {

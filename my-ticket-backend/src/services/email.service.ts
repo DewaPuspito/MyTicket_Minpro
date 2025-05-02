@@ -9,6 +9,7 @@ interface EmailFormat {
 
 export class EmailService {
     public async sendResetPassword(data: EmailFormat) {
+        try {
 
         const mailOptions = {
             from: process.env.EMAIL_SENDER,
@@ -16,8 +17,10 @@ export class EmailService {
             subject: 'Reset Password Instructions',
             html: passwordResetTemplate(data.user, data.resetLink)
         }
-
-        const info = await transporter.sendMail(mailOptions)
-        return info
+            await transporter.sendMail(mailOptions)
+            return { message: "Email sent" };
+        } catch (error) {
+            throw new Error("Failed to send email");
+        }
     }
 }
