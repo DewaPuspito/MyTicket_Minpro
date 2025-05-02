@@ -23,9 +23,9 @@ export interface UserProfile {
     name?: string,
     email?: string,
     password?: string,
-    birth_date?: string,
-    gender?: 'MALE' | 'FEMALE',
-    profile_pic?: string
+    profile_pic?: string,
+    refferalCodeOwned?: string,
+    points?: number
 }
 
 export interface EventInput {

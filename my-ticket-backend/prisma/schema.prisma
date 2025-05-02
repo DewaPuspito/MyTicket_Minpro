@@ -137,6 +137,8 @@ enum Status {
   PENDING
   PAID
   EXPIRED
+  REJECTED
+  CANCELLED
 }
 
 enum Rating {

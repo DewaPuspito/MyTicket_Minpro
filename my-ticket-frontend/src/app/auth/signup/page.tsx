@@ -1,5 +1,6 @@
 'use client';
 
+import api from "@/app/utils/api/myticket.api";
 import { Mail, Lock, User } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -14,14 +15,8 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [referralCode, setReferralCode] = useState("");
-  const [generatedReferral, setGeneratedReferral] = useState("");
 
-  const generateReferralCode = (name: string) => {
-    const random = Math.floor(1000 + Math.random() * 9000);
-    return `${name.split(" ")[0].toLowerCase()}${random}`;
-  };
-
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name || !email || !password || !role) {
@@ -29,21 +24,22 @@ export default function SignupPage() {
       return;
     }
 
-    const newReferralCode = generateReferralCode(name);
-    setGeneratedReferral(newReferralCode);
+    try {
+      const response = await api.post('/auth/register', {
+        name,
+        email,
+        password,
+        role: role === 'promotor' ? 'EVENT_ORGANIZER' : 'CUSTOMER',
+        referralCode: referralCode || undefined
+      });
 
-    // Simulasi kirim data ke backend
-    console.log({
-      name,
-      email,
-      password,
-      role,
-      referredBy: referralCode || null,
-      referralCode: newReferralCode,
-    });
-
-    alert(`Registered successfully!\nYour referral code: ${newReferralCode}`);
-    router.push("./signin");
+      if (response.data.success) {
+        alert('Registrasi berhasil! Silakan login.');
+        router.push('./signin');
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Terjadi kesalahan saat registrasi');
+    }
   };
 
   return (

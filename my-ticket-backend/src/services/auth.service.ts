@@ -3,7 +3,6 @@ import { Prisma } from "@prisma/client";
 import { JwtUtils } from "../lib/token.config";
 import bcrypt, { hash } from "bcrypt";
 import { UserRegister } from "../models/interface";
-import { EmailService } from "./email.service";
 
 export class AuthService {
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Ticket, Settings, Calendar, Twitch, RefreshCcw } from "lucide-react";
+import { User, Ticket, Calendar, RefreshCcw } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
