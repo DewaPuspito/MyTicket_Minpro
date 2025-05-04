@@ -34,7 +34,7 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-br from-[#0f172a] to-[#1e293b] shadow-2xl border-r border-white/10">
         <div className="p-6 text-white space-y-4">
-          <h2 className="text-2xl font-bold mb-8">My Dashboard</h2>
+          <h2 className="text-2xl font-bold mb-8">Organizer Dashboard</h2>
           {["events", "transactions", "stats", "attendees"].map((tab) => (
             <button
               key={tab}
