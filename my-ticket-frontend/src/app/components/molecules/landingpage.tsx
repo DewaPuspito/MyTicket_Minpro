@@ -1,16 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/app/components/atomics/button";
 import { Card, CardContent } from "@/app/components/atomics/card";
 import { Input } from "@/app/components/atomics/input";
 import Image from "next/image";
-import { events } from "@/data/event";
 import Navbar from "@/app/components/atomics/navbar";
+import api from "@/app/utils/api/myticket.api";
+
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  start_date: string;
+  location: string;
+  imageURL: string;
+}
 
 export default function LandingPage() {
   const [search, setSearch] = useState("");
+  const [events, setEvents] = useState<Event[]>([]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/event', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        console.log(response)
+        if (response.data.data) {
+          setEvents(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -77,22 +109,23 @@ export default function LandingPage() {
               >
                 <div className="relative h-48 w-full">
                   <Image
-                    src={event.image}
+                    src={event.imageURL}
                     alt={event.title}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
-                  {/* Category badge */}
                   <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
                     {event.category}
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <p className="text-white font-medium">{new Date(event.startDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}</p>
+                    <p className="text-white font-medium">
+                      {new Date(event.start_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
                   </div>
                 </div>
 
