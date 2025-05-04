@@ -111,7 +111,7 @@ export default function LandingPage() {
           <div>
             <h4 className="text-xl font-bold mb-4 flex items-center">
               <Image
-                src="/myticket.png"
+                src="/logo-transparent.png"
                 alt="Eventify Logo"
                 width={40}
                 height={40}
