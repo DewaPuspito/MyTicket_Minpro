@@ -20,7 +20,8 @@
     "react-dom": "^19.0.0",
     "react-feather": "^2.0.10",
     "react-icons": "^5.5.0",
-    "recharts": "^2.15.3"
+    "recharts": "^2.15.3",
+    "sweetalert2": "^11.20.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
