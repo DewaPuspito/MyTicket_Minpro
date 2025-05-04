@@ -2,7 +2,7 @@
 'use client'
 
 import api from "@/app/utils/api/myticket.api";
-import { Mail } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
@@ -77,7 +77,7 @@ export default function SigninPage() {
                         <label className="text-sm font-medium text-white/90">Password</label>
                         <div className="flex items-center bg-white/5 border border-white/20 rounded-lg px-4 py-3 gap-2 
                             focus-within:border-blue-400 transition-colors">
-                            <Mail className="text-white/60" size={20} />
+                            <Lock className="text-white/60" size={20} />
                             <input
                                 type="password"
                                 value={password}
