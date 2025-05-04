@@ -71,7 +71,7 @@ export default function ProfilePage() {
                         <div className="relative">
                             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20">
                                 <Image
-                                    src={profile.profile_pic}
+                                    src={profile.profile_pic || '/default-avatar.png'}
                                     alt="Profile Picture"
                                     width={96}
                                     height={96}
@@ -110,7 +110,7 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Referral Code */}
-                    {profile.role === 'Customer' && (
+                    {(profile.role?.toUpperCase() === 'CUSTOMER' || profile.role === 'Customer') && (
                         <div className="space-y-1">
                             <label className="text-sm text-white/90 font-medium">Your Referral Code</label>
                             <input
@@ -123,7 +123,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Points */}
-                    {profile.role === 'Customer' && (
+                    {(profile.role?.toUpperCase() === 'CUSTOMER' || profile.role === 'Customer') && (
                         <div className="space-y-1">
                             <label className="text-sm text-white/90 font-medium">Your Points</label>
                             <input

@@ -10,6 +10,7 @@ export class ProfileService {
         name: true,
         email: true,
         profile_pic: true,
+        role: true,
         refferalCode: true,
         Coupon: {
           select: {
@@ -27,6 +28,7 @@ export class ProfileService {
       name: user.name,
       email: user.email,
       profile_pic: user.profile_pic,
+      role: user.role,
       refferal_code_owned: user.refferalCode,
       points: totalPoints
     };
