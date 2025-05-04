@@ -4,23 +4,25 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/app/components/atomics/button";
 import { Card, CardContent } from "@/app/components/atomics/card";
-import {Input} from "@/app/components/atomics/input";
+import { Input } from "@/app/components/atomics/input";
 import Image from "next/image";
 import { events } from "@/data/event";
 import Navbar from "@/app/components/atomics/navbar";
 
-
 export default function LandingPage() {
   const [search, setSearch] = useState("");
+
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(search.toLowerCase()) ||
-    event.description.toLowerCase().includes(search.toLowerCase())
-  )
+    event.description.toLowerCase().includes(search.toLowerCase()) ||
+    event.category.toLowerCase().includes(search.toLowerCase())
+  );
+  
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f8fafc] to-[#e2e8f0]">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white py-12 px-6">
         <div className="max-w-6xl mx-auto text-center">
@@ -45,14 +47,14 @@ export default function LandingPage() {
 
         {/* Search bar */}
         <div className="flex justify-center mb-10">
-           <Input
-             type="text"
-             placeholder="Search event title or description..."
-             value={search}
-             onChange={(e) => setSearch(e.target.value)}
-             className="w-full max-w-xl bg-white text-gray-800 border border-gray-300 rounded-full px-6 py-3 shadow-sm focus:ring-2 focus:ring-blue-500"
-           />
-         </div>
+          <Input
+            type="text"
+            placeholder="Search event title or description..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full max-w-xl bg-white text-gray-800 border border-gray-300 rounded-full px-6 py-3 shadow-sm focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12">
@@ -81,6 +83,10 @@ export default function LandingPage() {
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
+                  {/* Category badge */}
+                  <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                    {event.category}
+                  </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                     <p className="text-white font-medium">{new Date(event.startDate).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -105,7 +111,7 @@ export default function LandingPage() {
         )}
       </main>
 
-      {/* Enhanced Footer */}
+      {/* Footer */}
       <footer className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white py-8 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
