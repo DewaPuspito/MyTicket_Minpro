@@ -114,7 +114,7 @@ export default function Navbar() {
                 ) : (
                     <>
                         {userRole === 'EVENT_ORGANIZER' && (
-                            <Link href="/create_event">
+                            <Link href="components/molecules/event/create_event">
                                 <Button className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg rounded-full px-6">
                                     <CalendarPlus className="w-5 h-5" />
                                     Create Event

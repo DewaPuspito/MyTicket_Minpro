@@ -132,7 +132,7 @@ export default function LandingPage() {
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold text-gray-800 mb-2">{event.title}</h3>
                   <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
-                  <Link href={`event/${event.id}`} className="block">
+                  <Link href={`components/molecules/event/${event.id}`} className="block">
                     <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-lg py-2 transition-all transform hover:scale-[1.02]">
                       View Details
                     </Button>

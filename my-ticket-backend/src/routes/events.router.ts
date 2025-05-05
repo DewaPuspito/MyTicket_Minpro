@@ -21,7 +21,7 @@ export class EventRouter {
     this.router.get('/event', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles(['CUSTOMER', 'EVENT_ORGANIZER']), this.eventController.findAll.bind(this.eventController))
     this.router.post('/event', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles('EVENT_ORGANIZER'), upload.single('imageURL'), ValidationMiddleware.validate({body: eventSchema.body}), this.eventController.create.bind(this.eventController))
     this.router.get('/event/:id', AuthenticationMiddleware.verifyToken, AuthorizationMiddleware.allowRoles(['CUSTOMER', 'EVENT_ORGANIZER']), this.eventController.findById.bind(this.eventController))
-    this.router.put('/event/:id', AuthenticationMiddleware.verifyToken, EventMiddleware.findEvent, AuthenticationMiddleware.checkEventOwnership, AuthorizationMiddleware.allowRoles('EVENT_ORGANIZER'), ValidationMiddleware.validate({body: eventSchema.body, params: eventSchema.params, partial: true}), this.eventController.update.bind(this.eventController))
+    this.router.put('/event/:id', AuthenticationMiddleware.verifyToken, EventMiddleware.findEvent, AuthenticationMiddleware.checkEventOwnership, upload.single('imageURL'), AuthorizationMiddleware.allowRoles('EVENT_ORGANIZER'), ValidationMiddleware.validate({body: eventSchema.body, params: eventSchema.params, partial: true}), this.eventController.update.bind(this.eventController))
     this.router.delete('/event/:id', AuthenticationMiddleware.verifyToken, EventMiddleware.findEvent, AuthenticationMiddleware.checkEventOwnership, AuthorizationMiddleware.allowRoles('EVENT_ORGANIZER'), this.eventController.delete.bind(this.eventController))
   }
 }
