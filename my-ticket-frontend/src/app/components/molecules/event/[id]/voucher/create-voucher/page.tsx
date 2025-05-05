@@ -60,11 +60,15 @@ export default function VoucherForm() {
           return;
         }
 
+        const expiryDate = new Date(formData.expiry_date);
+
+        expiryDate.setHours(expiryDate.getHours() + 7);
+
         const voucherData = {
           title: formData.title,
           code: formData.code,
           discount: formData.discount,
-          expiry_date: new Date(formData.expiry_date).toISOString(),
+          expiry_date: expiryDate.toISOString(),
           eventId: id
         };
 

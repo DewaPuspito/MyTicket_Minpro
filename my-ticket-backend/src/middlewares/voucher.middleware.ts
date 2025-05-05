@@ -3,9 +3,9 @@ import { Response, NextFunction } from "express";
 import { RequestCollection } from "../types/express";
 
 export class VoucherMiddleware {
-  static async findEventForTicket(req: RequestCollection, res: Response, next: NextFunction) {
+  static async findEventForVoucher(req: RequestCollection, res: Response, next: NextFunction) {
     try {
-      const userId = Number(req.params.userId);
+      const userId = req.user?.id;
       const eventId = Number(req.params.eventId);
       
       if (isNaN(eventId)) {

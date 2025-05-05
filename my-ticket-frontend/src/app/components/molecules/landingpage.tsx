@@ -32,7 +32,6 @@ export default function LandingPage() {
             'Authorization': `Bearer ${token}`
           }
         });
-        console.log(response)
         if (response.data.data) {
           setEvents(response.data.data);
         }

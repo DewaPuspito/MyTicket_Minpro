@@ -1,6 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/app/components/atomics/button";
+import { Card, CardContent } from "@/app/components/atomics/card";
 import Image from "next/image";
 import { CalendarDays, MapPin, Clock, Ticket, Minus, Plus } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,13 +9,12 @@ import { fadeIn, staggerContainer } from "@/app/utils/motion";
 import { useState, useEffect } from "react";
 import api from "@/app/utils/api/myticket.api";
 
+const formatPrice = (value: number | string) => {
+  const number = typeof value === "string" ? Number(value) : value;
+  return `Rp. ${number.toLocaleString("id-ID")}`;
+};
 
- const formatPrice = (value: number | string) => {
-   const number = typeof value === "string" ? Number(value) : value;
-   return `Rp. ${number.toLocaleString("id-ID")}`;
- };
-
- interface Event {
+interface Event {
   id: number;
   title: string;
   description: string;
@@ -25,13 +25,23 @@ import api from "@/app/utils/api/myticket.api";
   available_seats: number;
   imageURL: string;
   category: string;
+  vouchers?: Voucher[];
 }
- 
- export default function EventDetailPage() {
+
+interface Voucher {
+  id: number;
+  title: string;
+  code: string;
+  discount: number;
+  expiry_date: string;
+}
+
+export default function EventDetailPage() {
   const [ticketCount, setTicketCount] = useState(1);
   const [isNavigating, setIsNavigating] = useState(false);
   const [userRole, setUserRole] = useState<string>("");
   const [event, setEvent] = useState<Event | null>(null);
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { id } = useParams();
   const router = useRouter();
@@ -50,6 +60,14 @@ import api from "@/app/utils/api/myticket.api";
         
         if (response.data.data) {
           setEvent(response.data.data);
+          const voucherResponse = await api.get(`/event/${id}/voucher`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (voucherResponse.data.data) {
+            setVouchers(voucherResponse.data.data);
+          }
         }
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -60,6 +78,24 @@ import api from "@/app/utils/api/myticket.api";
 
     fetchEventDetail();
   }, [id]);
+
+  const handleDeleteVoucher = async (voucherId: number) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus voucher ini?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/event/${id}/voucher/${voucherId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setVouchers(vouchers.filter(v => v.id !== voucherId));
+      alert('Voucher berhasil dihapus');
+    } catch (error) {
+      alert('Error deleting voucher. Please try again later.');
+    }
+  };
 
   useEffect(() => {
     return () => setIsNavigating(false);
@@ -105,6 +141,7 @@ import api from "@/app/utils/api/myticket.api";
   if (!event) {
     return (
       <motion.div
+        variants={staggerContainer()}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 text-center p-6"
@@ -124,20 +161,20 @@ import api from "@/app/utils/api/myticket.api";
       </motion.div>
     );
   }
- 
+
   const increaseTicket = () => {
     if (ticketCount < event.available_seats) {
       setTicketCount((prev) => prev + 1);
     }
   };
- 
+
   const decreaseTicket = () => {
     setTicketCount((prev) => Math.max(1, prev - 1));
   };
- 
+
   const totalPrice = event.price * ticketCount;
   const isMaxTickets = ticketCount === event.available_seats;
- 
+
   return (
     <motion.div
       variants={staggerContainer()}
@@ -197,12 +234,68 @@ import api from "@/app/utils/api/myticket.api";
                 <div className="flex items-center text-lg text-gray-600">
                   <Clock className="w-6 h-6 mr-3 text-indigo-600" />
                   <span>
-                      {event.start_date.split('T')[1].substring(0, 5)}
+                    {event.start_date.split('T')[1].substring(0, 5)}
                   </span>
                 </div>
                 <div className="prose prose-lg text-gray-600">
                   {event.description}
                 </div>
+                {/* Voucher Section */}
+                <motion.div
+                  variants={fadeIn('up', 'tween', 0.6, 1)}
+                  className="bg-white shadow-xl rounded-2xl p-6 mt-8"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">Voucher Tersedia</h2>
+                  </div>
+
+                  {vouchers.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {vouchers.map((voucher) => (
+                        <Card key={voucher.id}>
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-semibold text-lg text-gray-800">{voucher.title}</h3>
+                            </div>
+                            <div className="space-y-2 mt-2">
+                              <p className="text-sm text-gray-600">
+                                Kode: <span className="font-mono font-semibold bg-gray-100 px-2 py-1 rounded">{voucher.code}</span>
+                              </p>
+                              <p className="text-sm text-gray-600">Diskon: <span className="font-semibold">{voucher.discount}%</span></p>
+                              <p className="text-sm text-gray-600">
+                                Berlaku sampai: {new Date(voucher.expiry_date).toLocaleDateString('id-ID', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </p>
+                            </div>
+                            {userRole === 'EVENT_ORGANIZER' && (
+                              <div className="flex justify-end gap-2 mt-4 border-t pt-4">
+                                <Button
+                                  onClick={() => router.push(`/components/molecules/event/${id}/voucher/update-voucher/${voucher.id}`)}
+                                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                                >
+                                  Update Voucher
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeleteVoucher(voucher.id)}
+                                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                                >
+                                  Hapus Voucher
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      Belum ada voucher tersedia untuk event ini
+                    </div>
+                  )}
+                </motion.div>
               </div>
 
               {/* Right Column - Ticket Purchase */}
@@ -310,5 +403,5 @@ import api from "@/app/utils/api/myticket.api";
         </motion.div>
       </div>
     </motion.div>
-   );
- }
+  );
+}
