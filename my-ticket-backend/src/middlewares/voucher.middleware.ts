@@ -10,10 +10,12 @@ export class VoucherMiddleware {
       
       if (isNaN(eventId)) {
         res.status(400).json({ message: 'Invalid event ID' });
+        return;
       }
 
       if (isNaN(userId)) {
         res.status(400).json({ message: 'Invalid user ID' });
+        return;
       }
 
       const event = await prisma.event.findUnique({
@@ -23,6 +25,7 @@ export class VoucherMiddleware {
 
       if (!event) {
         res.status(404).json({ message: 'Event not found' });
+        return;
       }
 
       if (event.userId !== userId) {
