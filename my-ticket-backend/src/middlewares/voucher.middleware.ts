@@ -1,0 +1,39 @@
+import { prisma } from "../prisma/client";
+import { Response, NextFunction } from "express";
+import { RequestCollection } from "../types/express";
+
+export class VoucherMiddleware {
+  static async findEventForTicket(req: RequestCollection, res: Response, next: NextFunction) {
+    try {
+      const userId = Number(req.params.userId);
+      const eventId = Number(req.params.eventId);
+      
+      if (isNaN(eventId)) {
+        res.status(400).json({ message: 'Invalid event ID' });
+      }
+
+      if (isNaN(userId)) {
+        res.status(400).json({ message: 'Invalid user ID' });
+      }
+
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+        include: { user: true }
+      });
+
+      if (!event) {
+        res.status(404).json({ message: 'Event not found' });
+      }
+
+      if (event.userId !== userId) {
+        res.status(403).json({ message: 'Unauthorized: Only event owner can manage vouchers' });
+        return;
+      }
+
+      req.event = event;
+      next();
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to find event' });
+    }
+  }
+}

@@ -2,8 +2,8 @@ import { prisma } from "../prisma/client";
 import { Response, NextFunction } from "express";
 import { RequestCollection } from "../types/express";
 
-export class TicketVoucherMiddleware {
-  static async findEventForTicketAndVoucher(req: RequestCollection, res: Response, next: NextFunction) {
+export class TicketMiddleware {
+  static async findEventForTicket(req: RequestCollection, res: Response, next: NextFunction) {
     try {
       const eventId = Number(req.params.eventId);
       
