@@ -111,7 +111,7 @@ export default function EventDetailPage() {
     }
     
     setIsNavigating(true);
-    router.push(`/event/${id}/ticket?count=${encodeURIComponent(ticketCount)}`);
+    router.push(`/components/molecules/event/${id}/ticket?count=${encodeURIComponent(ticketCount)}`);
   };
 
   const handleDeleteEvent = async () => {

@@ -1,216 +1,190 @@
-'use client';
-import { useEffect, useState } from 'react';
-import {
-  CalendarIcon,
-  ClockIcon,
-  BanknotesIcon,
-  ArrowUpTrayIcon,
-} from '@heroicons/react/24/outline';
-import { events } from '@/data/event';
-import { useParams, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+"use client";
 
-export default function InvoiceCard() {
-  const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 0, seconds: 0 });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [invoiceCode, setInvoiceCode] = useState('');
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
+import api from "@/app/utils/api/myticket.api";
+import { formatDate } from "@/app/utils/formatter";
+import Image from "next/image";
 
+interface Event {
+  id: number;
+  title: string;
+  start_date: string;
+  location: string;
+  price: number;
+  imageURL?: string;
+}
+
+const PaymentCheckoutPage = () => {
   const { id } = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const count = parseInt(searchParams.get("count") || "1");
-  const finalPrice = parseInt(searchParams.get("finalPrice") || "0");
+  const [event, setEvent] = useState<Event | null>(null);
+  const [timeLeft, setTimeLeft] = useState(7200);
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const event = events.find((event) => event.id === Number(id));
-  const originalPrice = event ? event.price * count : 0;
-  const youSave = event ? originalPrice - finalPrice : 0;
-
-  const generateInvoiceCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '#';
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setInvoiceCode(code);
-  };
+  const pointDiscount = parseInt(searchParams.get("points") || "0");
+  const voucherDiscount = parseInt(searchParams.get("voucher") || "0");
+  const ticketCount = parseInt(searchParams.get("count") || "1");
+  const totalPrice = parseInt(searchParams.get("total") || "0");
 
   useEffect(() => {
-    generateInvoiceCode();
+    const fetchEvent = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await api.get(`/event/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setEvent(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch event:", err);
+      }
+    };
+
+    if (id) fetchEvent();
+  }, [id]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev.seconds === 0) {
-          if (prev.minutes === 0) {
-            if (prev.hours === 0) {
-              clearInterval(timer);
-              return prev;
-            }
-            return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-          }
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        if (prev <= 1) {
+          clearInterval(timer);
+          handlePaymentExpired();
+          return 0;
         }
-        return { ...prev, seconds: prev.seconds - 1 };
+        return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
+      .toString()
+      .padStart(2, "0")}`;
   };
 
-  const handleSubmit = () => {
-    if (selectedFile) {
-      alert(`Payment proof ${selectedFile.name} successfully uploaded.`);
-    } else {
-      alert('Please select a file first.');
-    }
+  const handlePaymentExpired = () => {
+    alert("Waktu pembayaran habis.");
+    router.push(`/event/${id}`);
   };
-
-  if (!event) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="animate-pulse text-2xl font-bold text-gray-600">Loading Event...</div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 sm:p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-6xl mx-auto bg-white rounded-[2rem] shadow-2xl overflow-hidden
-        border-8 border-white/20 backdrop-blur-lg min-h-[80vh] landscape:min-h-[60vh]"
-      >
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-blue-900 p-8 text-white">
-          <div className="mb-4 md:mb-0">
-            <h1 className="text-3xl font-bold drop-shadow-md">{event.title}</h1>
-            <div className="flex items-center gap-2 mt-2">
-              <CalendarIcon className="w-6 h-6 text-blue-200" />
-              <span className="font-medium">
-                {new Date(event.startDate).toLocaleDateString('id-ID', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </span>
-            </div>
-          </div>
-        </div>
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">Konfirmasi Pembayaran</h1>
 
-        {/* Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-          {/* Left */}
+      {event && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Column: Event Info + Ringkasan */}
           <div className="space-y-6">
-            {/* Payment Info (Bank + Invoice) */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <BanknotesIcon className="w-8 h-8 text-green-600" />
-                <h3 className="text-lg font-bold">Bank Transfer</h3>
-              </div>
-              <div className="space-y-2 mb-6">
-                <p className="text-sm text-gray-500">Account Number</p>
-                <p className="font-bold text-xl">320 9990</p>
-                <p className="text-sm text-gray-500">BCA Virtual Account</p>
-              </div>
-              <div className="bg-blue-100 p-4 rounded-lg text-blue-800">
-                <p className="text-sm">Invoice Code</p>
-                <p className="text-lg font-bold">{invoiceCode}</p>
-              </div>
-            </div>
+            <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+              <h2 className="text-xl font-semibold">🗓️ Detail Event & Ringkasan Pembayaran</h2>
 
-            {/* Payment Deadline + Price */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-              {/* Payment Deadline (Merah) */}
-              <div className="flex items-center gap-4 text-red-600">
-                <ClockIcon className="w-8 h-8" />
-                <div>
-                  <p className="text-lg font-semibold">Payment Deadline</p>
-                  <p className="font-mono text-2xl font-bold">
-                    {timeLeft.hours.toString().padStart(2, '0')}:
-                    {timeLeft.minutes.toString().padStart(2, '0')}:
-                    {timeLeft.seconds.toString().padStart(2, '0')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Price Breakdown (Dinamis) */}
-              <div className="border-t pt-4 space-y-2 text-black">
-                <div className="flex justify-between">
-                  <p className="text-sm">Original Price</p>
-                  <p className="line-through text-lg">
-                    Rp {originalPrice.toLocaleString("id-ID")}
-                  </p>
-                </div>
-                <div className="flex justify-between">
-                  <p className="text-sm">You Save</p>
-                  <p className="text-green-600 font-bold">
-                    Rp {youSave.toLocaleString("id-ID")}
-                  </p>
-                </div>
-                <div className="flex justify-between border-t pt-2">
-                  <p className="text-sm font-semibold">Total Payment</p>
-                  <p className="text-xl font-bold">
-                    Rp {finalPrice.toLocaleString("id-ID")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right */}
-          <div className="space-y-6">
-            {/* Upload Payment Proof */}
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              className="border-3 border-dashed border-gray-200 rounded-2xl p-6 text-center bg-white hover:border-green-400 transition-all cursor-pointer"
-            >
-              <div className="space-y-4">
-                <div className="inline-flex p-4 bg-green-100 rounded-full">
-                  <ArrowUpTrayIcon className="w-8 h-8 text-green-600 animate-bounce" />
-                </div>
-                <div>
-                  <p className="font-semibold text-lg text-gray-800 mb-1">
-                    Upload Payment Proof
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Drag & drop files or <span className="text-green-600">browse</span>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-2">
-                    Supported formats: JPG, PNG, PDF (Max 5MB)
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={handleFileChange}
-                  className="mt-4 px-4 py-2 border border-gray-300 rounded-lg w-full"
+              {event.imageURL && (
+                <Image
+                  src={event.imageURL}
+                  alt={event.title}
+                  width={600}
+                  height={300}
+                  className="rounded-lg w-full object-cover"
                 />
-                <button
-                  onClick={handleSubmit}
-                  className="w-full py-3 mt-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all"
-                >
-                  Submit Payment Proof
-                </button>
-                <a
-                  href="/"
-                  className="block w-full mt-3 text-center py-3 bg-gray-100 text-gray-800 rounded-xl font-medium hover:bg-gray-200 transition-all"
-                >
-                  Back to Home Page
-                </a>
+              )}
+
+              <div>
+                <h3 className="text-lg font-bold">{event.title}</h3>
+                <p className="text-gray-600">{formatDate(event.start_date)}</p>
+                <p className="text-gray-600">{event.location}</p>
+                <p className="mt-2 text-sm text-gray-500">Jumlah Tiket: {ticketCount}</p>
               </div>
-            </motion.div>
+
+              <hr className="my-2" />
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>Rp {(event.price * ticketCount).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-red-500">
+                  <span>Potongan Poin</span>
+                  <span>- Rp {pointDiscount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-red-500">
+                  <span>Potongan Voucher</span>
+                  <span>- Rp {voucherDiscount.toLocaleString()}</span>
+                </div>
+                <hr />
+                <div className="flex justify-between font-bold text-indigo-700 text-lg">
+                  <span>Total Bayar</span>
+                  <span>Rp {totalPrice.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Timer & Upload */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-md p-6 text-center">
+              <h2 className="text-xl font-semibold mb-2">⏰ Waktu Tersisa</h2>
+              <p className="text-3xl font-bold text-red-600">{formatTime(timeLeft)}</p>
+              <p className="text-sm text-gray-500 mt-2">Bayar sebelum waktu habis</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">📤 Upload Bukti Pembayaran</h2>
+              <input
+                type="file"
+                accept="image/*"
+                className="block w-full p-2 border rounded-lg"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setPaymentProof(file);
+                    setPreviewImage(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              {previewImage && (
+                <div className="mt-4">
+                  <p className="text-sm mb-2 text-gray-500">Preview:</p>
+                  <div className="relative">
+                    <img
+                      src={previewImage}
+                      alt="Preview"
+                      className="w-full rounded-lg object-cover shadow"
+                    />
+                    <button
+                      onClick={() => {
+                        setPaymentProof(null);
+                        setPreviewImage(null);
+                      }}
+                      className="absolute top-2 right-2 bg-white text-red-600 hover:text-red-800 rounded-full p-1 shadow"
+                      title="Hapus gambar"
+                    >
+                      ❌
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => alert("Pembayaran dikonfirmasi!")}
+              disabled={isProcessing}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-lg font-semibold transition disabled:opacity-50"
+            >
+              Konfirmasi Pembayaran
+            </button>
           </div>
         </div>
-      </motion.div>
+      )}
     </div>
   );
-}
+};
+
+export default PaymentCheckoutPage;

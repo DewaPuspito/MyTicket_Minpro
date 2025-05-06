@@ -1,198 +1,194 @@
 "use client";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { events } from "@/data/event";
-import { Button } from "@/app/components/atomics/button";
-import Image from "next/image";
-import { ArrowLeft, CalendarDays, MapPin, Ticket } from "lucide-react";
-import { motion } from "framer-motion";
-import { fadeIn, staggerContainer } from "@/app/utils/motion";
-import { useEffect, useState } from "react";
 
-const formatPrice = (value: number) => {
-  return `Rp. ${value.toLocaleString("id-ID")}`;
-};
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import api from "@/app/utils/api/myticket.api";
+import Image from "next/image";
+import { Button } from "@/app/components/atomics/button";
+import { Card } from "@/app/components/atomics/card";
+import { formatDate } from "@/app/utils/formatter";
+import Link from "next/link";
+
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  start_date: string;
+  location: string;
+  imageURL: string;
+  price: number;
+}
+
+interface Voucher {
+  code: string;
+  discount: number;
+}
+
+const availableVouchers: Voucher[] = [
+  { code: "DISKON10K", discount: 10000 },
+  { code: "DISKON20K", discount: 20000 },
+  { code: "DISKON50K", discount: 50000 },
+];
+
+const MAX_POINTS = 100;
+const POINT_TO_RUPIAH = 10;
 
 export default function TicketPage() {
-  const params = useParams();
+  const { id } = useParams();
   const searchParams = useSearchParams();
-  const router = useRouter();
 
-  const id = params.id;
-  const count = searchParams.get("count");
-  const ticketCount = count ? parseInt(count) : 1;
+  const queryCount = parseInt(searchParams.get("count") || "1");
+  const queryPrice = parseInt(searchParams.get("price") || "0");
 
-  const [pointsUsed, setPointsUsed] = useState(0);
-  const [voucherCode, setVoucherCode] = useState("");
-  const [voucherDiscount, setVoucherDiscount] = useState(0);
-
-  const pointValue = 1000;
-  const discountFromPoints = pointsUsed * pointValue;
-
-  const event = events.find((event) => event.id === Number(id));
-
-  const totalPrice = event ? event.price * ticketCount : 0;
-  const finalPrice = Math.max(0, totalPrice - discountFromPoints - voucherDiscount);
+  const [event, setEvent] = useState<Event | null>(null);
+  const [ticketCount, setTicketCount] = useState<number>(queryCount);
+  const [pointsUsed, setPointsUsed] = useState<number>(0);
+  const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
 
   useEffect(() => {
-    // Contoh: validasi voucher
-    if (voucherCode === "DISKON10") {
-      const discount = totalPrice * 0.1; // 10% dari total harga
-      setVoucherDiscount(discount);
-    } else {
-      setVoucherDiscount(0);
+    const fetchEvent = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await api.get(`/event/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setEvent(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch event:", error);
+        setEvent(null);
+      }
+    };
+
+    if (id) fetchEvent();
+  }, [id]);
+
+  const handleTicketCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const parsed = parseInt(e.target.value, 10);
+    if (!isNaN(parsed)) {
+      const limited = Math.max(1, Math.min(10, parsed)); // minimum 1, maksimum 10
+      setTicketCount(limited);
     }
-  }, [voucherCode, totalPrice]);
+  };
+
+  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value)) setPointsUsed(Math.min(MAX_POINTS, Math.max(0, value)));
+  };
+
+  const handleVoucherChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const voucher = availableVouchers.find((v) => v.code === e.target.value) || null;
+    setSelectedVoucher(voucher);
+  };
 
   if (!event) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 text-center p-6"
-      >
-        <div className="max-w-md space-y-6">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Event Tidak Ditemukan! 😢</h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Event yang Anda cari tidak ditemukan atau mungkin telah dihapus.
-          </p>
-          <Button
-            onClick={() => router.push("/")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl transition-transform hover:scale-105"
-          >
-            Kembali ke Beranda
-          </Button>
-        </div>
-      </motion.div>
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-lg">Loading event data...</p>
+      </div>
     );
   }
 
+  const pricePerTicket = queryPrice > 0 ? queryPrice : event.price;
+  const priceBeforeDiscount = pricePerTicket * ticketCount;
+  const pointDiscount = pointsUsed * POINT_TO_RUPIAH;
+  const voucherDiscount = selectedVoucher?.discount || 0;
+  const totalPrice = Math.max(priceBeforeDiscount - pointDiscount - voucherDiscount, 0);
+
+  // Build payment URL
+  const paymentURL = `/components/molecules/event/${id}/ticket/payment?total=${totalPrice}&count=${ticketCount}&points=${pointDiscount}&voucher=${voucherDiscount}`;
+
   return (
-    <motion.div
-      variants={staggerContainer()}
-      initial="hidden"
-      animate="show"
-      className="flex flex-col min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0]"
-    >
-      <div className="w-full max-w-7xl mx-auto px-6 py-8 flex-grow">
-        <motion.div
-          variants={fadeIn("up", "tween", 0.4, 1)}
-          className="bg-white shadow-2xl rounded-2xl overflow-hidden p-6 md:p-8"
-        >
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Order Summary</h1>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Event Details */}
-            <div className="space-y-6">
-              <div className="relative h-64 w-full rounded-xl overflow-hidden">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">{event.title}</h2>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <CalendarDays className="w-5 h-5" />
-                  <span>
-                    {new Date(event.startDate).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
-                {event.location && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="w-5 h-5" />
-                    <span>{event.location}</span>
-                  </div>
-                )}
-              </div>
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Order Summary</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-4">
+          <Image
+            src={event.imageURL}
+            alt={event.title}
+            width={600}
+            height={300}
+            className="rounded-xl object-cover w-full h-64"
+          />
+          <div className="mt-4">
+            <h2 className="text-2xl font-bold">{event.title}</h2>
+            <div className="flex items-center mt-2 text-gray-600">
+              📅 <span className="ml-2">{formatDate(event.start_date)}</span>
             </div>
-
-            {/* Order Details */}
-            <div className="bg-indigo-50 p-6 rounded-xl space-y-6 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Ticket className="w-8 h-8 text-indigo-600" />
-                  <h3 className="text-xl font-bold">Detail Pesanan</h3>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Harga per Tiket</span>
-                    <span className="font-medium">
-                      {event.price ? formatPrice(event.price) : "GRATIS"}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Jumlah Tiket</span>
-                    <span className="font-medium">{ticketCount}</span>
-                  </div>
-
-                  {/* Input Poin */}
-                  <div className="space-y-2">
-                    <label className="text-sm text-gray-600">Gunakan Poin</label>
-                    <input
-                      type="number"
-                      value={pointsUsed}
-                      onChange={(e) => setPointsUsed(Number(e.target.value))}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400"
-                      placeholder="Masukkan jumlah poin"
-                      min={0}
-                    />
-                  </div>
-
-                  {/* Input Voucher */}
-                  <div className="space-y-2">
-                    <label className="text-sm text-gray-600">Kode Voucher</label>
-                    <input
-                      type="text"
-                      value={voucherCode}
-                      onChange={(e) => setVoucherCode(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400"
-                      placeholder="Masukkan kode voucher"
-                    />
-                  </div>
-
-                  <div className="border-t border-gray-200 my-4" />
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Potongan dari Poin</span>
-                    <span className="text-red-500">- {formatPrice(discountFromPoints)}</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Potongan Voucher</span>
-                    <span className="text-red-500">- {formatPrice(voucherDiscount)}</span>
-                  </div>
-
-                  <div className="border-t border-gray-200 my-4" />
-
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total Pembayaran</span>
-                    <span className="text-indigo-600">{formatPrice(finalPrice)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                className="w-full bg-indigo-600 hover:bg-indigo-700 py-5 rounded-xl mt-4"
-                onClick={() => router.push(`/event/${params.id}/ticket/payment?count=${ticketCount}&finalPrice=${finalPrice}`)
-              }
-              >
-                Confirm Payment
-              </Button>
+            <div className="flex items-center mt-1 text-gray-600">
+              📍 <span className="ml-2">{event.location}</span>
             </div>
           </div>
-        </motion.div>
+        </Card>
+
+        <Card className="bg-blue-50 p-6">
+          <h2 className="text-xl font-bold mb-4">🎟️ Detail Pesanan</h2>
+          <div className="space-y-3 text-gray-700">
+            <div className="flex justify-between">
+              <span>Harga per Tiket</span>
+              <span className="font-semibold">Rp {pricePerTicket.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Jumlah Tiket</span>
+              <input
+                type="number"
+                className="w-16 border border-gray-300 rounded px-3 py-2 text-center"
+                value={ticketCount}
+                onChange={handleTicketCountChange}
+                min={1}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Gunakan Poin (max {MAX_POINTS})</label>
+              <input
+                type="number"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                value={pointsUsed}
+                onChange={handlePointsChange}
+                min={0}
+                max={MAX_POINTS}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Pilih Kode Voucher</label>
+              <select
+                onChange={handleVoucherChange}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              >
+                <option value="">Tidak menggunakan voucher</option>
+                {availableVouchers.map((voucher) => (
+                  <option key={voucher.code} value={voucher.code}>
+                    {voucher.code} - Rp {voucher.discount.toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-between text-red-500">
+              <span>Potongan dari Poin</span>
+              <span>- Rp {pointDiscount.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-red-500">
+              <span>Potongan Voucher</span>
+              <span>- Rp {voucherDiscount.toLocaleString()}</span>
+            </div>
+            <hr />
+            <div className="flex justify-between text-xl font-bold text-blue-700">
+              <span>Total Pembayaran</span>
+              <span>Rp {totalPrice.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="mt-6">
+            <Link href={paymentURL}>
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
+                Confirm Payment
+              </Button>
+            </Link>
+          </div>
+        </Card>
       </div>
-    </motion.div>
+    </div>
   );
 }
