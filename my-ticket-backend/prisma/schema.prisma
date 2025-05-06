@@ -101,6 +101,7 @@ model Transaction {
   couponId     Int?
   status       Status
   paymentProof String
+  fixed_price  Int
   user         User      @relation(fields: [userId], references: [id])
   event        Event     @relation(fields: [eventId], references: [id])
   ticket       Ticket    @relation(fields: [ticketId], references: [id])
