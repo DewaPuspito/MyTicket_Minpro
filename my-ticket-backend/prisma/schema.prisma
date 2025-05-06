@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output = "../generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -93,20 +93,21 @@ model Coupon {
 }
 
 model Transaction {
-  id        Int       @id @default(autoincrement())
-  userId    Int
-  eventId   Int
-  ticketId  Int
-  voucherId Int?
-  couponId  Int?
-  status    Status
-  user      User      @relation(fields: [userId], references: [id])
-  event     Event     @relation(fields: [eventId], references: [id])
-  ticket    Ticket    @relation(fields: [ticketId], references: [id])
-  voucher   Voucher?  @relation(fields: [voucherId], references: [id])
-  coupon    Coupon?   @relation(fields: [couponId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @default(now())
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  eventId      Int
+  ticketId     Int
+  voucherId    Int?
+  couponId     Int?
+  status       Status
+  paymentProof String
+  user         User      @relation(fields: [userId], references: [id])
+  event        Event     @relation(fields: [eventId], references: [id])
+  ticket       Ticket    @relation(fields: [ticketId], references: [id])
+  voucher      Voucher?  @relation(fields: [voucherId], references: [id])
+  coupon       Coupon?   @relation(fields: [couponId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @default(now())
 }
 
 model Review {
