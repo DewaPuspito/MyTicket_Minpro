@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "@/app/utils/motion";
 import { useState, useEffect } from "react";
 import api from "@/app/utils/api/myticket.api";
+import Navbar from "@/app/components/atomics/navbar";
 
 const formatPrice = (value: number | string) => {
   const number = typeof value === "string" ? Number(value) : value;
@@ -176,6 +177,8 @@ export default function EventDetailPage() {
   const isMaxTickets = ticketCount === event.available_seats;
 
   return (
+    <>
+    <Navbar />
     <motion.div
       variants={staggerContainer()}
       initial="hidden"
@@ -403,5 +406,6 @@ export default function EventDetailPage() {
         </motion.div>
       </div>
     </motion.div>
+    </>
   );
 }

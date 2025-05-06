@@ -58,6 +58,30 @@ export class VoucherController {
     }
   }
 
+  public async findById(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params;
+        const voucher = await this.voucherService.getVoucherById(parseInt(id));
+        
+        if (!voucher) {
+            res.status(404).json({
+                message: 'Voucher not found'
+            });
+            return;
+        }
+
+        res.status(200).json({
+            message: 'Get voucher success',
+            data: voucher
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Internal server error',
+            detail: error
+        });
+    }
+}
+
   public async findByEventId(req: Request, res: Response): Promise<void> {
     try {
       const { eventId } = req.params;

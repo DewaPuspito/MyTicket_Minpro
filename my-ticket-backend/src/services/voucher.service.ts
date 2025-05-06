@@ -46,6 +46,10 @@ export class VoucherService {
       take: limit,
     });
   }
+
+  async getVoucherById(id: number) {
+    return prisma.voucher.findUnique({ where: { id } }); 
+  }
   
   async findByEventId(eventId: number) {
     return await prisma.voucher.findMany({
