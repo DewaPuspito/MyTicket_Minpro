@@ -12,10 +12,11 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 
     const navItems = [
         { id: 'tickets', icon: <Tag size={16} className="text-blue-400" />, label: 'My Tickets' },
-        { id: 'history', icon: <Clock size={16} className="text-green-400" />, label: 'Purchase History' },
+        { id: 'purchase history', icon: <Clock size={16} className="text-green-400" />, label: 'Purchase History' },
         { id: 'see-another-events', icon: <Tag size={16} className="text-pink-400" />, label: 'See Another Events', isExternal: true },
-        { id: 'edit account', icon: <Edit size={16} className="text-yellow-400" />, label: 'Edit Account' }
+        // { id: 'edit account', icon: <Edit size={16} className="text-yellow-400" />, label: 'Edit Account' }
     ];
+    
 
     return (
         <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-br from-[#0f172a] to-[#1e293b] shadow-2xl border-r border-white/10">
