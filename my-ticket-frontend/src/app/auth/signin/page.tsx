@@ -27,13 +27,23 @@ export default function SigninPage() {
                 password
             });
             
-            localStorage.setItem('userId', response.data.data.id);
-            localStorage.setItem('username', response.data.data.name);
-            localStorage.setItem('role', response.data.data.role);
-            localStorage.setItem('token', response.data.data.access_token);
-            router.push('/');
-        } catch (error) {
-            console.error('Login failed:', error);
+            if (response.data?.data?.access_token) {
+                localStorage.setItem('userId', response.data.data.id);
+                localStorage.setItem('username', response.data.data.name);
+                localStorage.setItem('role', response.data.data.role);
+                localStorage.setItem('token', response.data.data.access_token);
+                router.push('/');
+            } else {
+                throw new Error('Invalid credentials');
+            }
+        } catch (error: any) {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
+            localStorage.removeItem('role');
+            localStorage.removeItem('token');
+
+            const errorMessage = error.response?.data?.message || 'Login failed. Please check your email or password.';
+            alert(errorMessage)
         }
     };
 
@@ -101,11 +111,19 @@ export default function SigninPage() {
                 </form>
 
                 {/* Login Link */}
-                <div className="mt-6 text-center text-white/80">
-                    Don't Have an Account?{" "}
-                    <a href="./signup" className="text-white font-semibold underline hover:text-blue-300">
-                        Register
-                    </a>
+                <div className="mt-6 space-y-3 text-center text-sm text-white/80">
+                    <p>
+                        Don't Have An Account Yet?{" "}
+                        <a href="./signup" className="text-white font-semibold underline hover:text-blue-400 transition">
+                            Register
+                        </a>
+                    </p>
+                    <p>
+                        Forgot Password?{" "}
+                        <a href="./reset-password/email-confirmation" className="text-white font-semibold underline hover:text-red-400 transition">
+                            Reset Password
+                        </a>
+                    </p>
                 </div>
 
                 {/* Footer Text */}

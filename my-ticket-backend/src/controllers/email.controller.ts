@@ -17,7 +17,7 @@ export class EmailController {
 
       const info = await this.emailService.sendResetPassword({
           user: email,
-          resetLink: 'https://i.pinimg.com/736x/e5/8c/13/e58c13ce9ffab26bf47ce06565e7574b.jpg' 
+          resetLink: `${process.env.FRONTEND_URL}/auth/reset-password/new-password-input`
       });
 
       res.status(200).json({

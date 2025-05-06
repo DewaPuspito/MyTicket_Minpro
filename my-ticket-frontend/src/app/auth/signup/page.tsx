@@ -155,12 +155,6 @@ export default function SignupPage() {
               Login
             </a>
           </p>
-          <p>
-            Forgot Password?{" "}
-            <a href="#" className="text-white font-semibold underline hover:text-red-400 transition">
-              Reset Password
-            </a>
-          </p>
         </div>
 
         {/* Footer */}

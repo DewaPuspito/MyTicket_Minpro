@@ -8,15 +8,23 @@ interface EmailFormat {
 }
 
 export class EmailService {
+    // Fungsi untuk mengenkripsi email
+    private encryptEmail(email: string) {
+        return Buffer.from(email).toString('base64');
+    }
+
     public async sendResetPassword(data: EmailFormat) {
         try {
+            // Generate reset link dengan email terenkripsi
+            const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password/new-password-input?email=${this.encryptEmail(data.user)}`;
 
-        const mailOptions = {
-            from: process.env.EMAIL_SENDER,
-            to: data.user,
-            subject: 'Reset Password Instructions',
-            html: passwordResetTemplate(data.user, data.resetLink)
-        }
+            const mailOptions = {
+                from: process.env.EMAIL_SENDER,
+                to: data.user,
+                subject: 'Reset Password Instructions',
+                html: passwordResetTemplate(data.user, resetLink)
+            }
+            
             await transporter.sendMail(mailOptions)
             return { message: "Email sent" };
         } catch (error) {
