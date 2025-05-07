@@ -7,7 +7,6 @@ import Image from "next/image";
 import { Button } from "@/app/components/atomics/button";
 import { Card } from "@/app/components/atomics/card";
 import { formatDate } from "@/app/utils/formatter";
-import Link from "next/link";
 
 interface Event {
   id: number;
@@ -20,20 +19,6 @@ interface Event {
   price: number;
 }
 
-interface Voucher {
-  code: string;
-  discount: number;
-}
-
-const availableVouchers: Voucher[] = [
-  { code: "DISKON10K", discount: 10000 },
-  { code: "DISKON20K", discount: 20000 },
-  { code: "DISKON50K", discount: 50000 },
-];
-
-const MAX_POINTS = 100;
-const POINT_TO_RUPIAH = 10;
-
 export default function TicketPage() {
   const { id } = useParams();
   const searchParams = useSearchParams();
@@ -43,11 +28,9 @@ export default function TicketPage() {
   const queryPrice = parseInt(searchParams.get("price") || "0");
 
   const [event, setEvent] = useState<Event | null>(null);
-  const [ticketCount, setTicketCount] = useState<number>(queryCount);
-  const [pointsUsed, setPointsUsed] = useState<number>(0);
-  const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
+  const [voucherCode, setVoucherCode] = useState<string>("");
+  const [couponCode, setCouponCode] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<number>(2 * 60 * 60); // 2 hours in seconds
-
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
 
@@ -67,12 +50,8 @@ export default function TicketPage() {
   }, []);
 
   const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600)
-      .toString()
-      .padStart(2, "0");
-    const m = Math.floor((seconds % 3600) / 60)
-      .toString()
-      .padStart(2, "0");
+    const h = Math.floor(seconds / 3600).toString().padStart(2, "0");
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
@@ -96,25 +75,6 @@ export default function TicketPage() {
     if (id) fetchEvent();
   }, [id]);
 
-  const handleTicketCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const parsed = parseInt(e.target.value, 10);
-    if (!isNaN(parsed)) {
-      const limited = Math.max(1, parsed); // minimum 1 saja
-      setTicketCount(limited);
-    }
-  };
-
-  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value)) setPointsUsed(Math.min(MAX_POINTS, Math.max(0, value)));
-  };
-
-  const handleVoucherChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const voucher =
-      availableVouchers.find((v) => v.code === e.target.value) || null;
-    setSelectedVoucher(voucher);
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -128,21 +88,39 @@ export default function TicketPage() {
     setPreviewURL(null);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!paymentProof) {
       alert("Mohon upload bukti pembayaran terlebih dahulu.");
       return;
     }
 
-    // Simpan data transaksi (dummy logikanya)
-    console.log("Konfirmasi pembayaran:");
-    console.log("Event ID:", id);
-    console.log("Total bayar:", totalPrice);
-    console.log("File bukti:", paymentProof);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Silakan login terlebih dahulu");
+        router.push("/auth/signin");
+        return;
+      }
 
-    // Lanjutkan ke halaman sukses atau invoice
-    alert("Pembayaran berhasil dikonfirmasi!");
-    router.push("/dashboard/tickets");
+      const formData = new FormData();
+      formData.append("paymentProof", paymentProof);
+      formData.append("coupons", couponCode);
+      formData.append("vouchers", voucherCode);
+
+      const response = await api.post(`/ticket/${id}/create-transaction`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 201) {
+        alert("Transaksi berhasil dibuat! Menunggu konfirmasi dari event organizer.");
+        router.push("/dashboard_cust");
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || "Terjadi kesalahan saat membuat transaksi");
+    }
   };
 
   if (!event) {
@@ -154,13 +132,7 @@ export default function TicketPage() {
   }
 
   const pricePerTicket = queryPrice > 0 ? queryPrice : event.price;
-  const priceBeforeDiscount = pricePerTicket * ticketCount;
-  const pointDiscount = pointsUsed * POINT_TO_RUPIAH;
-  const voucherDiscount = selectedVoucher?.discount || 0;
-  const totalPrice = Math.max(
-    priceBeforeDiscount - pointDiscount - voucherDiscount,
-    0
-  );
+  const totalPrice = pricePerTicket * queryCount;
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -201,52 +173,37 @@ export default function TicketPage() {
             </div>
             <div className="flex justify-between items-center">
               <span>Jumlah Tiket</span>
-              <input
-                type="number"
-                className="w-16 border border-gray-300 rounded px-3 py-2 text-center"
-                value={ticketCount}
-                onChange={handleTicketCountChange}
-                min={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Gunakan Poin (max {MAX_POINTS})
-              </label>
-              <input
-                type="number"
-                className="w-full border border-gray-300 rounded px-3 py-2"
-                value={pointsUsed}
-                onChange={handlePointsChange}
-                min={0}
-                max={MAX_POINTS}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Pilih Kode Voucher
-              </label>
-              <select
-                onChange={handleVoucherChange}
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              >
-                <option value="">Tidak menggunakan voucher</option>
-                {availableVouchers.map((voucher) => (
-                  <option key={voucher.code} value={voucher.code}>
-                    {voucher.code} - Rp {voucher.discount.toLocaleString()}
-                  </option>
-                ))}
-              </select>
+              <span className="font-semibold">{queryCount}</span>
             </div>
 
-            <div className="flex justify-between text-red-500">
-              <span>Potongan dari Poin</span>
-              <span>- Rp {pointDiscount.toLocaleString()}</span>
+            {/* Form Voucher */}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Kode Voucher
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                value={voucherCode}
+                onChange={(e) => setVoucherCode(e.target.value)}
+                placeholder="Masukkan kode voucher"
+              />
             </div>
-            <div className="flex justify-between text-red-500">
-              <span>Potongan Voucher</span>
-              <span>- Rp {voucherDiscount.toLocaleString()}</span>
+
+            {/* Form Coupon */}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Kode Kupon
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="Masukkan kode kupon"
+              />
             </div>
+
             <hr />
             <div className="flex justify-between text-xl font-bold text-blue-700">
               <span>Total Pembayaran</span>
