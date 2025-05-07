@@ -6,6 +6,7 @@ import { ProfileRouter } from './routes/profile.router';
 import { EmailRouter } from './routes/email.router';
 import { TicketRouter } from './routes/ticket.router';
 import { VoucherRouter } from './routes/voucher.router';
+import { TransactionRouter } from './routes/transaction.router';
 
 class Server {
   private app: Application;
@@ -33,6 +34,7 @@ class Server {
     this.app.use('/api', new EmailRouter().router);
     this.app.use('/api', new TicketRouter().router);
     this.app.use('/api', new VoucherRouter().router);
+    this.app.use('/api', new TransactionRouter().router);
   }
 
   public start(): void {

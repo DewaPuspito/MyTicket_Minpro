@@ -88,7 +88,7 @@ export default function LandingPage() {
     const role = localStorage.getItem("role");
     if (role === "CUSTOMER") {
       router.push("/dashboard_cust");
-    } else if (role === "PROMOTOR") {
+    } else if (role === "EVENT_ORGANIZER") {
       router.push("/dashboard");
     } else {
       console.warn("Unknown role or not logged in.");

@@ -11,6 +11,13 @@ export interface EventPayload {
     userId: number
 }
 
+export interface TicketPayload {
+    id: number,
+    qty: number,
+    userId: number,
+    eventId: number,
+}
+
 export interface UserRegister {
     name: string,
     email: string,
@@ -75,4 +82,19 @@ export interface VoucherQuery {
     expiry_date?: Date;
     page?: number,
     limit?: number
+}
+
+export interface TransactionInput {
+    fixedPrice: number;
+    status: 'PENDING' | 'PAID' | 'EXPIRED' | 'REJECTED' | 'CANCELLED';
+    paymentProof: string;
+    userId: number;
+    eventId: number;
+    ticketId: number;
+    vouchers: {
+        id: number;
+      }[];
+      coupons: {
+        id: number
+      }[];
 }

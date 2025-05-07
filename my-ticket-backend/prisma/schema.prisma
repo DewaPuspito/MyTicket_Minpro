@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -67,48 +67,46 @@ model Ticket {
 }
 
 model Voucher {
-  id          Int           @id @default(autoincrement())
-  userId      Int
-  eventId     Int
-  title       String
-  code        String        @unique
-  discount    Int
-  expiry_date DateTime
-  user        User          @relation(fields: [userId], references: [id])
-  event       Event         @relation(fields: [eventId], references: [id])
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime?     @default(now())
-  Transaction Transaction[]
+  id                 Int                  @id @default(autoincrement())
+  userId             Int
+  eventId            Int
+  title              String
+  code               String               @unique
+  discount           Int
+  expiry_date        DateTime
+  user               User                 @relation(fields: [userId], references: [id])
+  event              Event                @relation(fields: [eventId], references: [id])
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime?            @default(now())
+  TransactionVoucher TransactionVoucher[]
 }
 
 model Coupon {
-  id          Int           @id @default(autoincrement())
-  userId      Int
-  code        String        @unique
-  points      Int
-  user        User          @relation(fields: [userId], references: [id])
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime?     @default(now())
-  Transaction Transaction[]
+  id                Int                 @id @default(autoincrement())
+  userId            Int
+  code              String              @unique
+  points            Int
+  user              User                @relation(fields: [userId], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime?           @default(now())
+  TransactionCoupon TransactionCoupon[]
 }
 
 model Transaction {
-  id           Int       @id @default(autoincrement())
-  userId       Int
-  eventId      Int
-  ticketId     Int
-  voucherId    Int?
-  couponId     Int?
-  status       Status
-  paymentProof String
-  fixed_price  Int
-  user         User      @relation(fields: [userId], references: [id])
-  event        Event     @relation(fields: [eventId], references: [id])
-  ticket       Ticket    @relation(fields: [ticketId], references: [id])
-  voucher      Voucher?  @relation(fields: [voucherId], references: [id])
-  coupon       Coupon?   @relation(fields: [couponId], references: [id])
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime? @default(now())
+  id                 Int                  @id @default(autoincrement())
+  userId             Int
+  eventId            Int
+  ticketId           Int
+  status             Status
+  paymentProof       String
+  fixedPrice         Int
+  user               User                 @relation(fields: [userId], references: [id])
+  event              Event                @relation(fields: [eventId], references: [id])
+  ticket             Ticket               @relation(fields: [ticketId], references: [id])
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime?            @default(now())
+  TransactionVoucher TransactionVoucher[]
+  TransactionCoupon  TransactionCoupon[]
 }
 
 model Review {
@@ -120,6 +118,24 @@ model Review {
   user      User     @relation(fields: [userId], references: [id])
   event     Event    @relation(fields: [eventId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model TransactionVoucher {
+  transactionId Int
+  voucherId     Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  voucher       Voucher     @relation(fields: [voucherId], references: [id])
+
+  @@id([transactionId, voucherId])
+}
+
+model TransactionCoupon {
+  transactionId Int
+  couponId      Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  coupon        Coupon      @relation(fields: [couponId], references: [id])
+
+  @@id([transactionId, couponId])
 }
 
 enum Role {
