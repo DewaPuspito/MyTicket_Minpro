@@ -3,64 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/app/components/atomics/button';
-import { User, Ticket, CalendarPlus, Settings, LogOut, Info } from 'lucide-react';
+import { CalendarPlus } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface UserProfileDropdownProps {
-    onLogout: () => void;
-}
-
-function UserProfileDropdown({ onLogout }: UserProfileDropdownProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const username = localStorage.getItem('username');
-    const role = localStorage.getItem('role');
-
-    return (
-        <div className="relative">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-full hover:bg-white/60 transition"
-            >
-                <User className="w-6 h-6 text-white" />
-            </button>
-
-            {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border z-50">
-                    <div className="px-4 py-2 text-sm text-gray-700">
-                        <p className="font-medium">{username}</p>
-                        <p className="text-xs text-green-800">{role === 'EVENT_ORGANIZER' ? 'Event Organizer' : 'Customer'}</p>
-                    </div>
-                    <hr className="my-1" />
-                    <div className="space-y-1">
-                        <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <Link href="components/molecules/profile/detail" className="w-full flex items-center text-sm text-gray-700 hover:bg-gray-100">
-                            <Info className="w-4 h-4 mr-3" />
-                            Information
-                        </Link>
-                        </button>
-                        {/* <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            <Ticket className="w-4 h-4 mr-3" />
-                            My Ticket
-                        </button>
-                        <Link href="/settings" className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            <Settings className="w-4 h-4 mr-3" />
-                            Settings
-                        </Link> */}
-                        <hr className="my-1" />
-                        <button 
-                        onClick={onLogout}
-                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                        <LogOut className="w-4 h-4 mr-3" />
-                        Log Out
-                    </button>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
+import UserProfileDropdown from '@/app/components/atomics/userprofile';
 
 export default function Navbar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -68,22 +14,27 @@ export default function Navbar() {
     const router = useRouter();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-        setIsLoggedIn(!!token);
-        setUserRole(role || '');
+        const updateProfileInfo = () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            setIsLoggedIn(!!token);
+            setUserRole(role || '');
+        };
+
+        updateProfileInfo();
+        window.addEventListener('profileUpdated', updateProfileInfo);
+
+        return () => {
+            window.removeEventListener('profileUpdated', updateProfileInfo);
+        };
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('username');
-        localStorage.removeItem('userId');
+        localStorage.clear();
         setIsLoggedIn(false);
         setUserRole('');
         router.push('/');
     };
-
 
     return (
         <header className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white px-6 py-4 flex flex-col md:flex-row justify-between items-center shadow-lg sticky top-0 z-50">
@@ -98,7 +49,7 @@ export default function Navbar() {
             </Link>
 
             <div className="flex items-center gap-3">
-            {!isLoggedIn ? (
+                {!isLoggedIn ? (
                     <>
                         <Link href="/auth/signup">
                             <Button className="border border-white/30 text-white bg-transparent hover:bg-white/10 rounded-full px-6">
