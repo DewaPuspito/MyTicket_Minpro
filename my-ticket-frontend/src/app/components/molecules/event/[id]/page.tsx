@@ -473,7 +473,7 @@ export default function EventDetailPage() {
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => {
                   setShowTicketModal(false);
-                  router.push(`/components/molecules/event/${id}/ticket`);
+                  router.push(`/components/molecules/event/${id}/ticket?count=${ticketCount}`);
                 }}
               >
                 Lanjutkan Transaksi

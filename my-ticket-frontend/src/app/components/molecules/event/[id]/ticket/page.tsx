@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import api from "@/app/utils/api/myticket.api";
 import Image from "next/image";
 import { Button } from "@/app/components/atomics/button";
@@ -37,6 +37,7 @@ const POINT_TO_RUPIAH = 10;
 export default function TicketPage() {
   const { id } = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const queryCount = parseInt(searchParams.get("count") || "1");
   const queryPrice = parseInt(searchParams.get("price") || "0");
@@ -45,6 +46,36 @@ export default function TicketPage() {
   const [ticketCount, setTicketCount] = useState<number>(queryCount);
   const [pointsUsed, setPointsUsed] = useState<number>(0);
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(2 * 60 * 60); // 2 hours in seconds
+
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const [previewURL, setPreviewURL] = useState<string | null>(null);
+
+  // Timer countdown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600)
+      .toString()
+      .padStart(2, "0");
+    const m = Math.floor((seconds % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  };
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -68,7 +99,7 @@ export default function TicketPage() {
   const handleTicketCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const parsed = parseInt(e.target.value, 10);
     if (!isNaN(parsed)) {
-      const limited = Math.max(1, Math.min(10, parsed)); // minimum 1, maksimum 10
+      const limited = Math.max(1, parsed); // minimum 1 saja
       setTicketCount(limited);
     }
   };
@@ -79,8 +110,39 @@ export default function TicketPage() {
   };
 
   const handleVoucherChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const voucher = availableVouchers.find((v) => v.code === e.target.value) || null;
+    const voucher =
+      availableVouchers.find((v) => v.code === e.target.value) || null;
     setSelectedVoucher(voucher);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPaymentProof(file);
+      setPreviewURL(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemovePreview = () => {
+    setPaymentProof(null);
+    setPreviewURL(null);
+  };
+
+  const handleSubmit = () => {
+    if (!paymentProof) {
+      alert("Mohon upload bukti pembayaran terlebih dahulu.");
+      return;
+    }
+
+    // Simpan data transaksi (dummy logikanya)
+    console.log("Konfirmasi pembayaran:");
+    console.log("Event ID:", id);
+    console.log("Total bayar:", totalPrice);
+    console.log("File bukti:", paymentProof);
+
+    // Lanjutkan ke halaman sukses atau invoice
+    alert("Pembayaran berhasil dikonfirmasi!");
+    router.push("/dashboard/tickets");
   };
 
   if (!event) {
@@ -95,14 +157,19 @@ export default function TicketPage() {
   const priceBeforeDiscount = pricePerTicket * ticketCount;
   const pointDiscount = pointsUsed * POINT_TO_RUPIAH;
   const voucherDiscount = selectedVoucher?.discount || 0;
-  const totalPrice = Math.max(priceBeforeDiscount - pointDiscount - voucherDiscount, 0);
-
-  // Build payment URL
-  const paymentURL = `/components/molecules/event/${id}/ticket/payment?total=${totalPrice}&count=${ticketCount}&points=${pointDiscount}&voucher=${voucherDiscount}`;
+  const totalPrice = Math.max(
+    priceBeforeDiscount - pointDiscount - voucherDiscount,
+    0
+  );
 
   return (
     <div className="max-w-6xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Order Summary</h1>
+
+      <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded text-center text-lg font-semibold">
+        ⏳ Waktu Tersisa untuk Pembayaran: {formatTime(timeLeft)}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-4">
           <Image
@@ -128,7 +195,9 @@ export default function TicketPage() {
           <div className="space-y-3 text-gray-700">
             <div className="flex justify-between">
               <span>Harga per Tiket</span>
-              <span className="font-semibold">Rp {pricePerTicket.toLocaleString()}</span>
+              <span className="font-semibold">
+                Rp {pricePerTicket.toLocaleString()}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span>Jumlah Tiket</span>
@@ -141,7 +210,9 @@ export default function TicketPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Gunakan Poin (max {MAX_POINTS})</label>
+              <label className="block text-sm font-medium mb-1">
+                Gunakan Poin (max {MAX_POINTS})
+              </label>
               <input
                 type="number"
                 className="w-full border border-gray-300 rounded px-3 py-2"
@@ -152,7 +223,9 @@ export default function TicketPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Pilih Kode Voucher</label>
+              <label className="block text-sm font-medium mb-1">
+                Pilih Kode Voucher
+              </label>
               <select
                 onChange={handleVoucherChange}
                 className="w-full border border-gray-300 rounded px-3 py-2"
@@ -179,13 +252,47 @@ export default function TicketPage() {
               <span>Total Pembayaran</span>
               <span>Rp {totalPrice.toLocaleString()}</span>
             </div>
+
+            {/* Upload Bukti Transfer */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium mb-1">
+                Upload Bukti Transfer
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="block w-full text-sm text-gray-500"
+              />
+              {previewURL && (
+                <div className="mt-3 relative w-fit">
+                  <button
+                    onClick={handleRemovePreview}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md -translate-y-1/2 translate-x-1/2"
+                    title="Hapus Preview"
+                  >
+                    &times;
+                  </button>
+                  <p className="text-sm text-gray-600 mb-1">Preview:</p>
+                  <Image
+                    src={previewURL}
+                    alt="Preview Bukti Pembayaran"
+                    width={400}
+                    height={250}
+                    className="rounded border border-gray-300"
+                  />
+                </div>
+              )}
+            </div>
           </div>
+
           <div className="mt-6">
-            <Link href={paymentURL}>
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
-                Confirm Payment
-              </Button>
-            </Link>
+            <Button
+              onClick={handleSubmit}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+            >
+              Konfirmasi Pembayaran
+            </Button>
           </div>
         </Card>
       </div>
