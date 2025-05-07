@@ -28,11 +28,6 @@ export class TicketService {
                 throw new Error(`Not enough tickets available. Only ${event.available_seats} left`);
             }
 
-            await prisma.event.update({
-                where: { id: event.id },
-                data: { available_seats: { decrement: data.qty } }
-            });
-
             const ticket = await prisma.ticket.create({
                 data: {
                     qty: data.qty,

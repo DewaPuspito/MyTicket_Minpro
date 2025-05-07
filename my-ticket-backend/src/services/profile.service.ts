@@ -14,7 +14,7 @@ export class ProfileService {
         refferalCode: true,
         Coupon: {
           select: {
-            points: true
+            code: true,
           }
         }
       }
@@ -22,7 +22,6 @@ export class ProfileService {
 
     if (!user) return null;
 
-    const totalPoints = user.Coupon.reduce((sum, coupon) => sum + coupon.points, 0);
 
     return {
       name: user.name,
@@ -30,7 +29,7 @@ export class ProfileService {
       profile_pic: user.profile_pic,
       role: user.role,
       refferal_code_owned: user.refferalCode,
-      points: totalPoints
+      codes: user.Coupon.map((coupon) => coupon.code),
     };
   }
   

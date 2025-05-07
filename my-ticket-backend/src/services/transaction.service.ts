@@ -100,7 +100,7 @@ export class TransactionService {
         // Update stok tiket
         await tx.ticket.update({
           where: { id: data.ticketId },
-          data: { qty: ticket.qty - 1 }
+          data: { qty: ticket.qty }
         });
 
         return newTransaction;
@@ -175,6 +175,14 @@ export class TransactionService {
         await prisma.ticket.update({
           where: { id: transaction.ticketId },
           data: { qty: { increment: 1 } }
+        });
+      }
+
+      // Tambahkan pengurangan available seats saat status PAID
+      if (status === 'PAID') {
+        await prisma.event.update({
+          where: { id: transaction.eventId },
+          data: { available_seats: { decrement: transaction.ticket.qty } }
         });
       }
 

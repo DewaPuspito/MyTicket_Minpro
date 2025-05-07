@@ -32,7 +32,7 @@ export interface UserProfile {
     password?: string,
     profile_pic?: string,
     refferalCodeOwned?: string,
-    points?: number
+    codes?: string[]
 }
 
 export interface EventInput {
