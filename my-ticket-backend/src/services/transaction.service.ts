@@ -126,6 +126,36 @@ export class TransactionService {
     }
   }
 
+  async getOrganizerTransactions(organizerId: number) {
+    // Query untuk mengambil transaksi berdasarkan event yang dimiliki organizer
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        event: {
+          userId: organizerId
+        }
+      },
+      include: {
+        user: {
+          select: {
+            email: true
+          }
+        },
+        event: {
+          select: {
+            title: true
+          }
+        },
+        ticket: {
+          select: {
+            id: true,
+            qty: true
+          }
+        }
+      }
+    });
+  
+    return transactions;
+  }
   public async cancelTransaction(transactionId: number) {
     try {
       return await prisma.$transaction(async (tx) => {

@@ -104,8 +104,17 @@ export default function TicketPage() {
 
       const formData = new FormData();
       formData.append("paymentProof", paymentProof);
-      formData.append("coupons", couponCode);
-      formData.append("vouchers", voucherCode);
+      formData.append("fixedPrice", totalPrice.toString());
+      formData.append("status", "PENDING");
+      formData.append("qty", queryCount.toString());
+      
+      if (voucherCode) {
+        formData.append("vouchers", JSON.stringify([{ code: voucherCode }]));
+      }
+      
+      if (couponCode) {
+        formData.append("coupons", JSON.stringify([{ code: couponCode }]));
+      }
 
       const response = await api.post(`/ticket/${id}/create-transaction`, formData, {
         headers: {

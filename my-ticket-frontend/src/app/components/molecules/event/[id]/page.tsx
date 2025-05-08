@@ -473,16 +473,10 @@ export default function EventDetailPage() {
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => {
                   setShowTicketModal(false);
-                  router.push(`/components/molecules/event/${id}/ticket?count=${ticketCount}`);
+                  router.push(`./${id}/ticket?count=${ticketCount}`);
                 }}
               >
                 Lanjutkan Transaksi
-              </Button>
-              <Button
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800"
-                onClick={() => setShowTicketModal(false)}
-              >
-                Tutup
               </Button>
             </div>
           </div>

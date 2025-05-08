@@ -11,11 +11,31 @@ cloudinary.config({
 })
 
 export class CloudinaryService {
-    public async uploadFile(file: Express.Multer.File): Promise<string> {
+    public async uploadFileForEvent(file: Express.Multer.File): Promise<string> {
         return new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
                 {
                     folder: 'myticket/events',
+                    resource_type: 'raw',
+                    public_id: file.originalname
+                },
+                (error, result: UploadApiResponse | undefined) => {
+                    if (error) {
+                        console.log("Upload Error: ", error)
+                        return reject(error)
+                    }
+                    resolve(result?.secure_url || '')
+                }
+            )
+            stream.end(file.buffer)
+        })
+    }
+
+    public async uploadFileForTransaction(file: Express.Multer.File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: 'myticket/transactions',
                     resource_type: 'raw',
                     public_id: file.originalname
                 },

@@ -24,7 +24,7 @@ export class EventController {
         return
       }
 
-      const imageUrl = await this.cloudinaryService.uploadFile(req.file as Express.Multer.File);
+      const imageUrl = await this.cloudinaryService.uploadFileForEvent(req.file as Express.Multer.File);
       
       const data: EventInput = {
         ...req.body,
@@ -96,7 +96,7 @@ export class EventController {
       let imageUrl;
 
       if (req.file) {
-        imageUrl = await this.cloudinaryService.uploadFile(req.file as Express.Multer.File);
+        imageUrl = await this.cloudinaryService.uploadFileForEvent(req.file as Express.Multer.File);
       }
 
       const data: Partial<EventInput> = {
