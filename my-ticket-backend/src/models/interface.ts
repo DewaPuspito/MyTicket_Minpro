@@ -92,9 +92,9 @@ export interface TransactionInput {
     eventId: number;
     ticketId: number;
     vouchers: {
-        id: number;
+        code: string;
       }[];
       coupons: {
-        id: number
+        code: string
       }[];
 }

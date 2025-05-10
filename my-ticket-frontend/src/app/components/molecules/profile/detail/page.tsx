@@ -172,6 +172,25 @@ export default function ProfilePage() {
                         </div>
                     )}
 
+                    {(profile.role?.toUpperCase() === 'CUSTOMER' || profile.role === 'Customer') && (
+                        <div className="space-y-1">
+                            <label className="text-sm text-white/90 font-medium">Your Referral Code </label>
+                            <div className="w-full bg-white/5 text-white border border-white/20 rounded-lg px-4 py-3 focus:outline-none cursor-default">
+                                {Array.isArray(profile.refferal_code_owned) ? (
+                                    profile.refferal_code_owned.map((code, index) => (
+                                        <div key={index}>{code}</div>
+                                    ))
+                                ) : typeof profile.refferal_code_owned === 'string' && profile.refferal_code_owned.length > 0 ? (
+                                    profile.refferal_code_owned.split(',').map((code, index) => (
+                                        <div key={index}>{code.trim()}</div>
+                                    ))
+                                ) : (
+                                    'No coupon code exist'
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Coupon Codes */}
                     {(profile.role?.toUpperCase() === 'CUSTOMER' || profile.role === 'Customer') && (
                         <div className="space-y-1">

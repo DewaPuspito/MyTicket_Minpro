@@ -22,14 +22,17 @@ export class TransactionService {
         // Proses multiple coupons
         if (data.coupons && data.coupons.length > 0) {
           for (const couponData of data.coupons) {
-            const coupon = await tx.coupon.findUnique({
-              where: { id: couponData.id }
+            const coupon = await tx.coupon.findFirst({
+              where: {
+                code: couponData.code,
+              }
             });
         
-            if (!coupon || coupon.userId !== data.userId) {
-              throw new Error(`Coupon ${couponData.id} not found or not valid for this user`);
+            if (!coupon) {
+              throw new Error(`Coupon dengan kode "${couponData.code}" tidak valid, telah digunakan, atau sudah kedaluwarsa`);
+            } else {
+              finalPrice -= coupon.points;
             }
-            finalPrice -= coupon.points;
 
             // Update poin di coupon
             await tx.coupon.update({
@@ -44,13 +47,13 @@ export class TransactionService {
           for (const voucherData of data.vouchers) {
             const voucher = await tx.voucher.findUnique({
               where: { 
-                id: voucherData.id,
+                code: voucherData.code,
                 expiry_date: { gt: new Date() }
               }
             });
 
             if (!voucher) {
-              throw new Error(`Voucher ${voucherData.id} not valid or expired`);
+              throw new Error(`Voucher ${voucherData.code} not valid or expired`);
             }
 
             const discount = (finalPrice * voucher.discount) / 100;
@@ -71,16 +74,18 @@ export class TransactionService {
             TransactionVoucher: {
               create: data.vouchers.map(v => ({
                 voucher: {
-                  connect: { id: v.id }
+                  connect: { code: v.code }
                 }
               }))
             },
             TransactionCoupon: {
-              create: data.coupons.map(c => ({
-                coupon: {
-                  connect: { id: c.id }
-                }
-              }))
+              create: data.coupons
+                .filter(c => c.code) // pastikan ada code
+                .map(c => ({
+                  coupon: {
+                    connect: { code: c.code }
+                  }
+                }))
             }
           }, include: {
             TransactionVoucher: {  
