@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { Check, X, FileText } from 'react-feather';
+import { Check, X } from 'react-feather';
 import { motion } from 'framer-motion';
 import api from '@/app/utils/api/myticket.api';
 import { toast } from 'react-hot-toast';
@@ -16,6 +16,7 @@ interface Transaction {
   ticket: {
     id: number;
     qty: number;
+    // total_price: number; // optional untuk handle undefined
   };
   fixedPrice: number;
   status: 'PENDING' | 'PAID' | 'EXPIRED' | 'REJECTED' | 'CANCELLED';
@@ -33,13 +34,11 @@ const TransactionsTab = () => {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Token:', token);
       const response = await api.get('/get-transactions', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('Response:', response.data);
       setTransactions(response.data.data);
     } catch (error) {
       toast.error('Gagal mengambil data transaksi');
@@ -51,15 +50,11 @@ const TransactionsTab = () => {
   const handleUpdateStatus = async (transactionId: number, status: 'PAID' | 'REJECTED') => {
     try {
       const token = localStorage.getItem('token');
-      await api.patch(`/transaction/${transactionId}/status`, 
-        { status },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+      await api.patch(`/transaction/${transactionId}/status`, { status }, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
-      
+      });
       toast.success(`Transaksi berhasil ${status === 'PAID' ? 'disetujui' : 'ditolak'}`);
       fetchTransactions();
     } catch (error) {
@@ -120,22 +115,22 @@ const TransactionsTab = () => {
                 <td className="px-6 py-4 text-right">
                   {transaction.status === 'PENDING' && (
                     <div className="flex justify-end gap-2">
-                      <button 
+                      <button
                         onClick={() => handleUpdateStatus(transaction.id, 'PAID')}
                         className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
                         title="Setujui Transaksi"
                       >
                         <Check size={18} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleUpdateStatus(transaction.id, 'REJECTED')}
                         className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                         title="Tolak Transaksi"
                       >
                         <X size={18} />
                       </button>
-                      <a 
-                        href={transaction.paymentProof} 
+                      <a
+                        href={transaction.paymentProof}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-3 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-sm font-medium"

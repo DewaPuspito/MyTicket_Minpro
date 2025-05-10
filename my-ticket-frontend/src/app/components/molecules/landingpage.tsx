@@ -37,6 +37,34 @@ export default function LandingPage() {
     Autoplay({ delay: 5000 }),
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const router = useRouter();
+
+  // Load saved search from localStorage on mount
+  useEffect(() => {
+    const savedSearch = localStorage.getItem("search");
+    if (savedSearch) {
+      setSearch(savedSearch);
+    }
+  }, []);
+
+  // Save search to localStorage when updated
+  useEffect(() => {
+    localStorage.setItem("search", search);
+  }, [search]);
+
+  // Remove search when token is gone (logout)
+  useEffect(() => {
+    const checkLogout = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        localStorage.removeItem("search");
+        setSearch("");
+      }
+    };
+
+    window.addEventListener("storage", checkLogout);
+    return () => window.removeEventListener("storage", checkLogout);
+  }, []);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -82,8 +110,6 @@ export default function LandingPage() {
     };
   }, [emblaApi]);
 
-  const router = useRouter();
-
   const handleDashboardRedirect = () => {
     const role = localStorage.getItem("role");
     if (role === "CUSTOMER") {
@@ -94,7 +120,6 @@ export default function LandingPage() {
       console.warn("Unknown role or not logged in.");
     }
   };
-
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f8fafc] to-[#e2e8f0]">
@@ -119,7 +144,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Carousel Content */}
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-6xl mx-auto text-center text-white px-6">
             <h1 className="text-5xl font-extrabold mb-4 leading-tight">
@@ -142,11 +166,9 @@ export default function LandingPage() {
                 Your Dashboard
               </Button>
             </div>
-
           </div>
         </div>
 
-        {/* Carousel Controls (centered) */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="flex gap-2">
@@ -154,8 +176,7 @@ export default function LandingPage() {
                 <button
                   key={index}
                   onClick={() => emblaApi?.scrollTo(index)}
-                  className={`h-3 rounded-full transition-all duration-300 ${index === selectedIndex ? "bg-white w-8" : "bg-white/50 w-3"
-                    }`}
+                  className={`h-3 rounded-full transition-all duration-300 ${index === selectedIndex ? "bg-white w-8" : "bg-white/50 w-3"}`}
                 />
               ))}
             </div>
@@ -204,7 +225,10 @@ export default function LandingPage() {
             <h3 className="text-2xl font-medium text-gray-800">No events found</h3>
             <p className="text-gray-600">Try different keywords or check back later!</p>
             <Button
-              onClick={() => setSearch("")}
+              onClick={() => {
+                setSearch("");
+                localStorage.removeItem("search");
+              }}
               className="mt-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-8 py-3 text-lg"
             >
               Reset Search
@@ -267,6 +291,7 @@ export default function LandingPage() {
         )}
       </main>
 
+      {/* Footer */}
       <footer className="bg-gradient-to-r from-[#002459] to-[#0d1e4a] text-white py-8 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>

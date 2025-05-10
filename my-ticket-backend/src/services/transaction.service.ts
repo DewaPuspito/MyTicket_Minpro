@@ -117,17 +117,44 @@ export class TransactionService {
     try {
       const transactions = await prisma.transaction.findMany({
         where: { userId },
-        include: { event: true }
+        include: {
+          event: {
+            select: {
+              title: true,
+              start_date: true,
+              location: true
+            }
+          },
+          ticket: {
+            select: {
+              qty: true,
+              total_price: true
+            }
+          },
+          TransactionVoucher: {
+            include: {
+              voucher: true
+            }
+          },
+          TransactionCoupon: {
+            include: {
+              coupon: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
       });
-
+  
       return transactions;
     } catch (error) {
       throw new Error("Failed to fetch transactions");
     }
   }
+  
 
-  async getOrganizerTransactions(organizerId: number) {
-    // Query untuk mengambil transaksi berdasarkan event yang dimiliki organizer
+  public async getOrganizerTransactions(organizerId: number) {
     const transactions = await prisma.transaction.findMany({
       where: {
         event: {
@@ -137,25 +164,41 @@ export class TransactionService {
       include: {
         user: {
           select: {
+            name: true,
             email: true
           }
         },
         event: {
           select: {
-            title: true
+            title: true,
+            start_date: true
           }
         },
         ticket: {
           select: {
-            id: true,
-            qty: true
+            qty: true,
+            total_price: true
+          }
+        },
+        TransactionVoucher: {
+          include: {
+            voucher: true
+          }
+        },
+        TransactionCoupon: {
+          include: {
+            coupon: true
           }
         }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
   
     return transactions;
   }
+  
   public async cancelTransaction(transactionId: number) {
     try {
       return await prisma.$transaction(async (tx) => {
@@ -198,14 +241,6 @@ export class TransactionService {
 
       if (!transaction) {
         throw new Error("Transaction not found");
-      }
-
-      if (status === 'REJECTED') {
-        // Restore ticket quantity if rejected
-        await prisma.ticket.update({
-          where: { id: transaction.ticketId },
-          data: { qty: { increment: 1 } }
-        });
       }
 
       // Tambahkan pengurangan available seats saat status PAID

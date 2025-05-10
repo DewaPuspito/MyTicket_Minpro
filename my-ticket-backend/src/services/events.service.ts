@@ -11,7 +11,7 @@ export class EventService {
 
 
   async findAll(query: EventQuery) {
-    const {search, description, location, category, imageURL, page = 1, limit = 10} = query
+    const {search, description, location, category, imageURL, page = 1, limit = 15} = query
 
     const where : Prisma.EventWhereInput = {}
 

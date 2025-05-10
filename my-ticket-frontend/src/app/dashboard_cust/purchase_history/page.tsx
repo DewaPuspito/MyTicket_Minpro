@@ -3,16 +3,20 @@
 import { useEffect, useState } from 'react';
 import api from '@/app/utils/api/myticket.api';
 
-interface Transaction {
-  id: number;
+interface Ticket {
+  eventId: number;
   event: {
     title: string;
     start_date: string;
   };
+  ticket: {
+    qty: number;
+  };
   status: 'PENDING' | 'PAID' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+  fixedPrice: number;
 }
 
-const getStatusColor = (status: Transaction['status']) => {
+const getStatusColor = (status: Ticket['status']) => {
   switch (status) {
     case 'PENDING':
       return 'bg-yellow-100 text-yellow-800';
@@ -29,7 +33,7 @@ const getStatusColor = (status: Transaction['status']) => {
   }
 };
 
-const getStatusLabel = (status: Transaction['status']) => {
+const getStatusLabel = (status: Ticket['status']) => {
   switch (status) {
     case 'PENDING':
       return 'PENDING';
@@ -47,7 +51,7 @@ const getStatusLabel = (status: Transaction['status']) => {
 };
 
 const HistoryPage = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,8 +66,8 @@ const HistoryPage = () => {
 
         const response = await api.get('/get-transactions', {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (response.data.success) {
@@ -106,8 +110,8 @@ const HistoryPage = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {transactions.map((tx) => (
-            <div key={tx.id} className="border rounded-xl p-4 bg-white shadow-sm">
+          {transactions.map((tx, index) => (
+            <div key={index} className="border rounded-xl p-4 bg-white shadow-sm">
               <div className="flex justify-between items-center">
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900">{tx.event.title}</h4>
@@ -116,8 +120,14 @@ const HistoryPage = () => {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
                     })}
+                  </p>
+                  <p className="text-sm text-gray-700 mt-1">
+                    Jumlah Tiket: {tx.ticket?.qty}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    Total Harga: Rp {tx.fixedPrice.toLocaleString('id-ID')}
                   </p>
                 </div>
                 <span

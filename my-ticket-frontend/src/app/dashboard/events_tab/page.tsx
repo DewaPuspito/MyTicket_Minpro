@@ -1,9 +1,16 @@
-// EventsTab.tsx
+'use client';
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit3, Calendar, Tag } from 'react-feather';
+import { Plus, Edit3, Calendar } from 'react-feather';
 
-const EventsTab = ({ events }: { events: Array<any> }) => {
+interface Event {
+  id: number;
+  title: string;
+  userId: number;
+}
+
+const EventsTab = ({ events }: { events: Event[] }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -19,26 +26,26 @@ const EventsTab = ({ events }: { events: Array<any> }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {events.map((event) => (
+        {events.map((event, index) => (
           <motion.div
-            key={event.id}
+            key={index}
             whileHover={{ scale: 1.005 }}
             className="group border border-gray-100 rounded-xl p-5 hover:shadow-md transition-all bg-gradient-to-r from-blue-50/50 to-purple-50/50"
           >
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-1.5">{event.name}</h4>
+                <h4 className="text-lg font-semibold text-gray-800 mb-1.5">{event.title}</h4>
                 <div className="flex items-center text-sm text-gray-600 space-x-3">
                   <span className="flex items-center bg-white px-2.5 py-1 rounded-full shadow-sm">
                     <Calendar size={14} className="mr-1.5 text-blue-500" />
-                    {event.date}
+                    Tanggal belum tersedia
                   </span>
                   <span className="text-gray-300">|</span>
-                  <span className="bg-white px-2.5 py-1 rounded-full shadow-sm">{event.location}</span>
+                  <span className="bg-white px-2.5 py-1 rounded-full shadow-sm">Lokasi tidak diketahui</span>
                 </div>
                 <div className="mt-3 flex items-center gap-2">
                   <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                    {event.ticketsSold} tickets sold
+                    0 tickets sold
                   </span>
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 </div>

@@ -53,7 +53,7 @@ export class EventController {
         location: req.query.location as string,
         category: req.query.category as string,
         page: req.query.page ? parseInt(req.query.page as string) : 1,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 15,
       };
       const result = await this.eventService.findAll(query);
       res.status(200).json({
