@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import api from "@/app/utils/api/myticket.api";
 import Image from "next/image";
 import { Button } from "@/app/components/atomics/button";
@@ -20,7 +21,8 @@ interface Event {
 }
 
 export default function TicketPage() {
-  const { id } = useParams();
+  const {eventId, ticketId} = useParams();
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -30,11 +32,10 @@ export default function TicketPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [voucherCode, setVoucherCode] = useState<string>("");
   const [couponCode, setCouponCode] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState<number>(2 * 60 * 60); // 2 hours in seconds
+  const [timeLeft, setTimeLeft] = useState<number>(2 * 60 * 60);
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
 
-  // Timer countdown
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -58,9 +59,10 @@ export default function TicketPage() {
 
   useEffect(() => {
     const fetchEvent = async () => {
+      if (!eventId) return;
       try {
         const token = localStorage.getItem("token");
-        const response = await api.get(`/event/${id}`, {
+        const response = await api.get(`/event/${eventId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -72,8 +74,8 @@ export default function TicketPage() {
       }
     };
 
-    if (id) fetchEvent();
-  }, [id]);
+    if (eventId) fetchEvent();
+  }, [eventId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,21 +109,24 @@ export default function TicketPage() {
       formData.append("fixedPrice", totalPrice.toString());
       formData.append("status", "PENDING");
       formData.append("qty", queryCount.toString());
-      
+
       if (voucherCode) {
         formData.append("vouchers", JSON.stringify([{ code: voucherCode }]));
       }
-      
       if (couponCode) {
         formData.append("coupons", JSON.stringify([{ code: couponCode }]));
       }
 
-      const response = await api.post(`/ticket/${id}/create-transaction`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await api.post(
+        `/event/${eventId}/ticket/${ticketId}/create-transaction`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (response.status === 201) {
         alert("Transaksi berhasil dibuat! Menunggu konfirmasi dari event organizer.");
@@ -185,11 +190,8 @@ export default function TicketPage() {
               <span className="font-semibold">{queryCount}</span>
             </div>
 
-            {/* Form Voucher */}
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Kode Voucher
-              </label>
+              <label className="block text-sm font-medium mb-1">Kode Voucher</label>
               <input
                 type="text"
                 className="w-full border border-gray-300 rounded px-3 py-2"
@@ -199,11 +201,8 @@ export default function TicketPage() {
               />
             </div>
 
-            {/* Form Coupon */}
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Kode Kupon
-              </label>
+              <label className="block text-sm font-medium mb-1">Kode Kupon</label>
               <input
                 type="text"
                 className="w-full border border-gray-300 rounded px-3 py-2"
@@ -219,11 +218,8 @@ export default function TicketPage() {
               <span>Rp {totalPrice.toLocaleString()}</span>
             </div>
 
-            {/* Upload Bukti Transfer */}
             <div className="mt-4">
-              <label className="block text-sm font-medium mb-1">
-                Upload Bukti Transfer
-              </label>
+              <label className="block text-sm font-medium mb-1">Upload Bukti Transfer</label>
               <input
                 type="file"
                 accept="image/*"

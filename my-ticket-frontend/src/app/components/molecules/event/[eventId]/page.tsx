@@ -56,7 +56,7 @@ export default function EventDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
-  const { id } = useParams();
+  const { eventId } = useParams();
   const router = useRouter();
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function EventDetailPage() {
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
         setUserRole(role || "");
-        const response = await api.get(`/event/${id}`, {
+        const response = await api.get(`/event/${eventId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -73,7 +73,7 @@ export default function EventDetailPage() {
         
         if (response.data.data) {
           setEvent(response.data.data);
-          const voucherResponse = await api.get(`/event/${id}/voucher`, {
+          const voucherResponse = await api.get(`/event/${eventId}/voucher`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -90,14 +90,14 @@ export default function EventDetailPage() {
     };
 
     fetchEventDetail();
-  }, [id]);
+  }, [eventId]);
 
   const handleDeleteVoucher = async (voucherId: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus voucher ini?')) return;
 
     try {
       const token = localStorage.getItem('token');
-      await api.delete(`/event/${id}/voucher/${voucherId}`, {
+      await api.delete(`/event/${eventId}/voucher/${voucherId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -128,7 +128,7 @@ export default function EventDetailPage() {
     setIsNavigating(true);
     
     try {
-      const response = await api.post(`/event/${id}/generate-ticket`, {
+      const response = await api.post(`/event/${eventId}/generate-ticket`, {
         qty: ticketCount
       }, {
         headers: {
@@ -137,11 +137,13 @@ export default function EventDetailPage() {
       });
 
       if (response.data.success) {
-        setTicketData(response.data.data);
+        const ticket = response.data.data;
+        console.log("Ticket ID:", ticket.id); // <- Gunakan ini, bukan useParams
+        setTicketData(ticket);
         setShowTicketModal(true);
         
         // Refresh event data
-        const eventResponse = await api.get(`/event/${id}`, {
+        const eventResponse = await api.get(`/event/${eventId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -161,7 +163,7 @@ export default function EventDetailPage() {
 
     try {
       const token = localStorage.getItem('token');
-      await api.delete(`/event/${id}`, {
+      await api.delete(`/event/${eventId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -320,7 +322,7 @@ export default function EventDetailPage() {
                               {userRole === 'EVENT_ORGANIZER' && (
                                 <div className="flex justify-end gap-2 mt-4 border-t pt-4">
                                   <Button
-                                    onClick={() => router.push(`/components/molecules/event/${id}/voucher/update-voucher/${voucher.id}`)}
+                                    onClick={() => router.push(`/components/molecules/event/${eventId}/voucher/update-voucher/${voucher.id}`)}
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
                                   >
                                     Update Voucher
@@ -356,13 +358,13 @@ export default function EventDetailPage() {
                         <div className="space-y-4">
                           <Button
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl transition-all"
-                            onClick={() => router.push(`/components/molecules/event/${id}/update-event`)}
+                            onClick={() => router.push(`/components/molecules/event/${eventId}/update-event`)}
                           >
                             Update Event
                           </Button>
                           <Button
                             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl transition-all"
-                            onClick={() => router.push(`/components/molecules/event/${id}/voucher/create-voucher`)}
+                            onClick={() => router.push(`/components/molecules/event/${eventId}/voucher/create-voucher`)}
                           >
                             Add Voucher
                           </Button>
@@ -473,7 +475,7 @@ export default function EventDetailPage() {
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => {
                   setShowTicketModal(false);
-                  router.push(`./${id}/ticket?count=${ticketCount}`);
+                  router.push(`./${eventId}/ticket/${ticketData.id}/?count=${ticketCount}`);
                 }}
               >
                 Lanjutkan Transaksi

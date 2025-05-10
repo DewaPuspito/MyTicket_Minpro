@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Swal from 'sweetalert2';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import api from "@/app/utils/api/myticket.api";
 
-export default function VoucherForm() {
+export default function UpdateVoucherForm() {
   interface FormData {
     title: string;
     code: string;
@@ -15,7 +15,7 @@ export default function VoucherForm() {
     expiry_date: string;
   }
 
-  const { id } = useParams();
+  const { eventId, voucherId } = useParams();
   const [formData, setFormData] = useState<FormData>({
     title: '',
     code: '',
@@ -26,6 +26,52 @@ export default function VoucherForm() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchVoucherData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          Swal.fire({
+            title: 'Error',
+            text: 'Silakan login terlebih dahulu',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+          router.push('/auth/login');
+          return;
+        }
+
+        const response = await api.get(`/event/${eventId}/voucher/${voucherId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.data.data) {
+          const voucherData = response.data.data;
+          const expiryDate = new Date(voucherData.expiry_date);
+          
+          setFormData({
+            title: voucherData.title,
+            code: voucherData.code,
+            discount: voucherData.discount,
+            expiry_date: expiryDate.toISOString().slice(0, 16)
+          });
+        }
+      } catch (error: any) {
+        Swal.fire({
+          title: 'Error',
+          text: error.response?.data?.message || 'Terjadi kesalahan saat mengambil data voucher',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        router.push(`/components/molecules/event/${eventId}`);
+      }
+    };
+
+    fetchVoucherData();
+  }, [eventId, voucherId, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,10 +85,10 @@ export default function VoucherForm() {
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.title) newErrors.title = 'Title must be filled';
-    if (!formData.code) newErrors.code = 'Voucher code must be filled';
-    if (!formData.discount) newErrors.discount = 'Voucher discount must be filled';
-    if (!formData.expiry_date) newErrors.expiry_date = 'Expiry date must be filled';
+    if (!formData.title) newErrors.title = 'Judul harus diisi';
+    if (!formData.code) newErrors.code = 'Kode voucher harus diisi';
+    if (!formData.discount) newErrors.discount = 'Diskon harus diisi';
+    if (!formData.expiry_date) newErrors.expiry_date = 'Tanggal kadaluarsa harus diisi';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -55,48 +101,50 @@ export default function VoucherForm() {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          alert('Please login first');
+          Swal.fire({
+            title: 'Error',
+            text: 'Silakan login terlebih dahulu',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
           router.push('/auth/login');
           return;
         }
 
         const expiryDate = new Date(formData.expiry_date);
-
         expiryDate.setHours(expiryDate.getHours() + 7);
 
         const voucherData = {
           title: formData.title,
           code: formData.code,
           discount: formData.discount,
-          expiry_date: expiryDate.toISOString(),
-          eventId: id
+          expiry_date: expiryDate.toISOString()
         };
 
-        const response = await api.post(`/event/${id}/voucher`, voucherData, {
+        const response = await api.put(`/event/${eventId}/voucher/${voucherId}`, voucherData, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
 
-        if (response.status === 201) {
+        if (response.status === 200) {
           await Swal.fire({
-            title: 'Voucher successfully created',
+            title: 'Sukses',
+            text: 'Voucher berhasil diperbarui',
             icon: 'success',
-            confirmButtonColor: '#3085d6',
             confirmButtonText: 'OK'
           });
           
-          router.push(`/components/molecules/event/${id}`);
+          router.push(`/components/molecules/event/${eventId}`);
         }
       } catch (error: any) {
-        if (error.response) {
-          alert(`Error: ${error.response.data.message || 'Something went wrong please try again later'}`);
-        } else if (error.request) {
-          alert('Cannot connect to the server');
-        } else {
-          alert('Internal Server Error');
-        }
+        Swal.fire({
+          title: 'Error',
+          text: error.response?.data?.message || 'Terjadi kesalahan saat memperbarui voucher',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
       } finally {
         setIsLoading(false);
       }
@@ -109,41 +157,41 @@ export default function VoucherForm() {
         <div className="flex flex-col items-center text-center space-y-3 mb-8">
           <Image
             src="/logo-transparent.png"
-            alt="Eventify Logo"
+            alt="MyTicket Logo"
             width={80}
             height={80}
             className="object-contain"
           />
-          <h2 className="text-3xl font-bold text-white/90">Create New Voucher</h2>
+          <h2 className="text-3xl font-bold text-white/90">Update Voucher</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-white/90 font-medium mb-2">Title</label>
+            <label className="block text-white/90 font-medium mb-2">Judul</label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className={`w-full border rounded-lg p-3 focus:outline-none focus:ring-2 text-white ${errors.title ? 'border-red-500 focus:ring-red-300' : 'border-white/20 focus:ring-blue-300'}`}
+              className={`w-full bg-white/5 border rounded-lg p-3 focus:outline-none focus:ring-2 text-white ${errors.title ? 'border-red-500 focus:ring-red-300' : 'border-white/20 focus:ring-blue-300'}`}
             />
             {errors.title && <p className="text-sm text-red-400 mt-1">{errors.title}</p>}
           </div>
 
           <div>
-            <label className="block text-white/90 font-medium mb-2">Voucher Code</label>
+            <label className="block text-white/90 font-medium mb-2">Kode Voucher</label>
             <input
               type="text"
               name="code"
               value={formData.code}
               onChange={handleChange}
-              className={`w-full border rounded-lg p-3 focus:outline-none focus:ring-2 text-white ${errors.code ? 'border-red-500 focus:ring-red-300' : 'border-white/20 focus:ring-blue-300'}`}
+              className={`w-full bg-white/5 border rounded-lg p-3 focus:outline-none focus:ring-2 text-white ${errors.code ? 'border-red-500 focus:ring-red-300' : 'border-white/20 focus:ring-blue-300'}`}
             />
             {errors.code && <p className="text-sm text-red-400 mt-1">{errors.code}</p>}
           </div>
 
           <div>
-            <label className="block text-white/90 font-medium mb-2">Discount (%)</label>
+            <label className="block text-white/90 font-medium mb-2">Diskon (%)</label>
             <input
               type="number"
               name="discount"
@@ -151,13 +199,13 @@ export default function VoucherForm() {
               max="100"
               value={formData.discount}
               onChange={handleChange}
-              className={`w-full border rounded-lg p-3 focus:outline-none focus:ring-2 text-white ${errors.discount ? 'border-red-500 focus:ring-red-300' : 'border-white/20 focus:ring-blue-300'}`}
+              className={`w-full bg-white/5 border rounded-lg p-3 focus:outline-none focus:ring-2 text-white ${errors.discount ? 'border-red-500 focus:ring-red-300' : 'border-white/20 focus:ring-blue-300'}`}
             />
             {errors.discount && <p className="text-sm text-red-400 mt-1">{errors.discount}</p>}
           </div>
 
           <div>
-            <label className="block text-white/90 font-medium mb-2">Expiry Date</label>
+            <label className="block text-white/90 font-medium mb-2">Tanggal Kadaluarsa</label>
             <input
               type="datetime-local"
               name="expiry_date"
@@ -175,7 +223,7 @@ export default function VoucherForm() {
             className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:opacity-90 transition-all"
             disabled={isLoading}
           >
-            {isLoading ? 'Making Voucher...' : 'Create Voucher'}
+            {isLoading ? 'Memperbarui Voucher...' : 'Update Voucher'}
           </motion.button>
         </form>
       </div>

@@ -15,9 +15,15 @@ export class TransactionController {
         const cloudinaryService = new CloudinaryService();
         paymentProofUrl = await cloudinaryService.uploadFileForTransaction(file);
       }
+
+      const ticketId = parseInt(req.params.ticketId);
+      const eventId = parseInt(req.params.eventId);
   
       const result = await this.transactionService.createTransaction({
         ...req.body,
+        userId: req.user?.id,
+        ticketId,
+        eventId,
         coupons: req.body.coupons ? JSON.parse(req.body.coupons) : [],
         vouchers: req.body.vouchers ? JSON.parse(req.body.vouchers) : [],
         paymentProof: paymentProofUrl,

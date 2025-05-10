@@ -22,7 +22,7 @@ export default function EventForm() {
     image: File | null;
   }
 
-  const { id } = useParams();
+  const { eventId } = useParams();
   const [formData, setFormData] = useState<FormData>({
     title: '',
     startDate: '',
@@ -41,7 +41,7 @@ export default function EventForm() {
     const fetchEventData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await api.get(`/event/${id}`, {
+        const response = await api.get(`/event/${eventId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -69,10 +69,10 @@ export default function EventForm() {
       }
     };
 
-    if (id) {
+    if (eventId) {
       fetchEventData();
     }
-  }, [id]);
+  }, [eventId]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -141,7 +141,7 @@ export default function EventForm() {
           formDataToSend.append('imageURL', formData.image);
         }
 
-        const response = await api.put(`/event/${id}`, formDataToSend, {
+        const response = await api.put(`/event/${eventId}`, formDataToSend, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
@@ -157,7 +157,7 @@ export default function EventForm() {
             confirmButtonText: 'OK'
           });
           
-          router.push(`/components/molecules/event/${id}`);
+          router.push(`/components/molecules/event/${eventId}`);
         }
       } catch (error: any) {
         console.error('Error updating event:', error);
